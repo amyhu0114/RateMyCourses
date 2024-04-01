@@ -10,6 +10,7 @@ require("dotenv").config({ path: path.join(process.env.HOME, '.cs304env')});
 const express = require('express');
 const morgan = require('morgan');
 const serveStatic = require('serve-static');
+const bcrypt = require('bcrypt');
 const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
 const flash = require('express-flash');
@@ -50,6 +51,8 @@ app.use(cookieSession({
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 
+const ROUNDS = 15;
+
 // ================================================================
 // custom routes here
 
@@ -67,47 +70,141 @@ app.get('/', (req, res) => {
     return res.render('main.ejs', {uid, visits});
 });
 
-// shows how logins might work by setting a value in the session
-// This is a conventional, non-Ajax, login, so it redirects to main page 
-app.post('/set-uid/', (req, res) => {
-    console.log('in set-uid');
-    req.session.uid = req.body.uid;
-    req.session.logged_in = true;
-    res.redirect('/');
-});
-
-// shows how logins might work via Ajax
-app.post('/set-uid-ajax/', (req, res) => {
-    console.log(Object.keys(req.body));
-    console.log(req.body);
-    let uid = req.body.uid;
-    if(!uid) {
-        res.send({error: 'no uid'}, 400);
-        return;
+// ===============Beginning of Amy Work ============================
+const DBNAME = "RateMyCourse";
+const USERS = "users";
+app.post("/join", async (req, res) => {
+    try {
+      const username = req.body.username;
+      const password = req.body.password;
+      const db = await Connection.open(mongoUri, DBNAME);
+      var existingUser = await db.collection(USERS).findOne({username: username});
+      if (existingUser) {
+        req.flash('error', "Login already exists - please try logging in instead.");
+        console.log("Login already exists - please try logging in instead.");
+        return res.redirect('/')
+      }
+      const hash = await bcrypt.hash(password, ROUNDS);
+      await db.collection(USERS).insertOne({
+          username: username,
+          hash: hash
+      });
+      console.log('successfully joined', username, password, hash);
+      req.flash('info', 'successfully joined and logged in as ' + username);
+      req.session.username = username;
+      req.session.loggedIn = true;
+      return res.redirect('/form');
+    } catch (error) {
+      req.flash('error', `Form submission error: ${error}`);
+      return res.redirect('/')
     }
-    req.session.uid = req.body.uid;
-    req.session.logged_in = true;
-    console.log('logged in via ajax as ', req.body.uid);
-    res.send({error: false});
-});
+  });
+  
+  app.post("/login", async (req, res) => {
+    try {
+      const username = req.body.username;
+      const password = req.body.password;
+      const db = await Connection.open(mongoUri, DBNAME);
+      var existingUser = await db.collection(USERS).findOne({username: username});
+      console.log('user', existingUser);
+      if (!existingUser) {
+        req.flash('error', "Username does not exist - try again.");
+        console.log("Username does not exist - try again.");
+       return res.redirect('/')
+      }
+      const match = await bcrypt.compare(password, existingUser.hash); 
+      console.log('match', match);
+      if (!match) {
+          req.flash('error', "Username or password incorrect - try again.");
+          console.log("Username or password incorrect - try again.");
+          return res.redirect('/')
+      }
+      req.flash('info', 'successfully logged in as ' + username);
+      console.log('successfully logged in as ' + username);
+      req.session.username = username;
+      req.session.loggedIn = true;
+      console.log('login as', username);
+      return res.redirect('/form');
+    } catch (error) {
+      req.flash('error', `Form submission error: ${error}`);
+      console.log(`Form submission error: ${error}`);
+      return res.redirect('/')
+    }
+  });
+  
+  app.post('/logout', (req,res) => {
+    if (req.session.username) {
+      req.session.username = null;
+      req.session.loggedIn = false;
+      req.flash('info', 'You are logged out');
+      return res.redirect('/');
+    } else {
+      req.flash('error', 'You are not logged in - please do so.');
+      return res.redirect('/');
+    }
+  });
 
-// conventional non-Ajax logout, so redirects
-app.post('/logout/', (req, res) => {
-    console.log('in logout');
-    req.session.uid = false;
-    req.session.logged_in = false;
-    res.redirect('/');
-});
+  function requiresLogin(req, res, next) {
+    if (!req.session.loggedIn) {
+      req.flash('error', 'This page requires you to be logged in - please do so.');
+      return res.redirect("/");
+    } else {
+        next();
+    }
+  }
+// ===============End of Amy Work ==================================
+
+// ===============Given Code Below (Don't Delete yet)===============
+
+// // shows how logins might work by setting a value in the session
+// // This is a conventional, non-Ajax, login, so it redirects to main page 
+// app.post('/set-uid/', (req, res) => {
+//     console.log('in set-uid');
+//     req.session.uid = req.body.uid;
+//     req.session.logged_in = true;
+//     res.redirect('/');
+// });
+
+// // shows how logins might work via Ajax
+// app.post('/set-uid-ajax/', (req, res) => {
+//     console.log(Object.keys(req.body));
+//     console.log(req.body);
+//     let uid = req.body.uid;
+//     if(!uid) {
+//         res.send({error: 'no uid'}, 400);
+//         return;
+//     }
+//     req.session.uid = req.body.uid;
+//     req.session.logged_in = true;
+//     console.log('logged in via ajax as ', req.body.uid);
+//     res.send({error: false});
+// });
+
+// // conventional non-Ajax logout, so redirects
+// app.post('/logout/', (req, res) => {
+//     console.log('in logout');
+//     req.session.uid = false;
+//     req.session.logged_in = false;
+//     res.redirect('/');
+// });
 
 // two kinds of forms (GET and POST), both of which are pre-filled with data
 // from previous request, including a SELECT menu. Everything but radio buttons
 
-app.get('/form/', (req, res) => {
+app.get('/form/', requiresLogin, (req, res) => {
     console.log('get form');
+    // START OF AMY TEST
+    if (!req.session.loggedIn) {
+        req.flash('error', 'You are not logged in - please do so.');
+        console.log('You are not logged in - please do so.');
+        return res.redirect("/");
+    }
+    console.log("hi");
+    // End of AMY TEST
     return res.render('form.ejs', {action: '/form/', data: req.query });
 });
 
-app.post('/form/', (req, res) => {
+app.post('/form/', requiresLogin, (req, res) => {
     console.log('post form');
     return res.render('form.ejs', {action: '/form/', data: req.body });
 });

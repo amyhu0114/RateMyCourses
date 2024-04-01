@@ -15,6 +15,7 @@
         <a href=index2.html>Search</a>
       </div> 
 
+    <%- include("partials/flashes.ejs") %>
 <main>
 
     <form id ="myForm" method = "GET" action = "/search/">
@@ -30,6 +31,34 @@
     <h1>RateMyCourse</h1>
     <p>A web application by Amy, Nya, Sophia, and Nico</p>
 
+    <ul>
+        <li><a href="/">home</a></li>
+        <li><a href="/form">form</a></li>
+    </ul>
+    <h2>Register:</h2>
+  <p>
+    <form action="/join" method="POST">
+        <label> Username
+            <input type="text" name="username" placeholder="og102">
+        </label>
+        <label> Password
+            <input type="text" name="password" placeholder="********">
+        </label>
+      <button type="submit">register</button>
+    </form>
+  </p>
+  <h2>Login:</h2>
+  <p>
+    <form action="/login" method="POST">
+        <label> Username
+            <input type="text" name="username" placeholder="og102">
+        </label>
+        <label> Password
+            <input type="text" name="password" placeholder="********">
+        </label>
+      <button type="submit">login</button>
+    </form>
+  </p>
 
 
 </main>
