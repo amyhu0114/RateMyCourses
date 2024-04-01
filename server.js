@@ -64,7 +64,7 @@ app.get('/', (req, res) => {
     visits++;
     req.session.visits = visits;
     console.log('uid', uid);
-    return res.render('index.ejs', {uid, visits});
+    return res.render('main.ejs', {uid, visits});
 });
 
 // shows how logins might work by setting a value in the session
