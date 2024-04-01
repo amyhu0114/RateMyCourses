@@ -8,6 +8,9 @@
     <!-- loading jquery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 </head>
+<%- include("partials/navbar.ejs", {loggedIn: loggedIn}) %>
+
+    <%- include("partials/flashes.ejs") %>
 <body>
     <h1>Submit a form</h1>
 

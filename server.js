@@ -67,7 +67,8 @@ app.get('/', (req, res) => {
     visits++;
     req.session.visits = visits;
     console.log('uid', uid);
-    return res.render('main.ejs', {uid, visits});
+    loggedIn = (req.session.loggedIn)||false;
+    return res.render('main.ejs', {loggedIn: loggedIn});
 });
 
 // ===============Beginning of Amy Work ============================
@@ -201,7 +202,8 @@ app.get('/form/', requiresLogin, (req, res) => {
     }
     console.log("hi");
     // End of AMY TEST
-    return res.render('form.ejs', {action: '/form/', data: req.query });
+    loggedIn = (req.session.loggedIn)||false;
+    return res.render('form.ejs', {action: '/form/', data: req.query, loggedIn: loggedIn });
 });
 
 app.post('/form/', requiresLogin, (req, res) => {
