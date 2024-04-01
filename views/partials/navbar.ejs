@@ -1,15 +1,15 @@
 <nav>
   <div class="topnav">
-    <a class="active" href="main.ejs">Home</a>
-    <a href=index2.html>Make Review</a>
+    <a class="active" href="/">Home</a>
+    <a href="/">Make Review</a>
     <% if(loggedIn){ %>
-      <a href=index2.html>Profile</a>
+      <a href="/">Profile</a>
       <p><form action="/logout" method="POST">
         <button>Logout </button>
       </form></p>
     <% } else{ %>  
-      <a href=index2.html>Sign Up</a>
-      <a href=index2.html>Log In</a>
+      <a href="/">Sign Up</a>
+      <a href="/">Log In</a>
    <% } %>
     
 </div> 
