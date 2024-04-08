@@ -191,8 +191,8 @@ app.post("/join", async (req, res) => {
 // ===============End of Amy Work ==================================
 
 // ===============Beginning of Nya Work ============================
-function insertReview(db, courseId, difficulty, workload, text, userId, accessibility, rating){
-  let result = db.collection("reviews").insertOne({courseId: courseId, contentDifficulty: difficulty, workloadRating: workload, reviewText: text, userId: userId, accessibility: accessibility, rating: rating});
+function insertReview(db, courseId, difficulty, workload, text, userId){
+  let result = db.collection("reviews").insertOne({courseId: courseId, contentDifficulty: difficulty, workloadRating: workload, reviewText: text, userId: userId});
   return result;
 }
 
@@ -208,15 +208,12 @@ app.get('/review/', requiresLogin, async (req, res) => {
 app.post("/review/", async (req, res) => {
   try {
     const db = await Connection.open(mongoUri, DBNAME);
-    var courseCode = req.body.courseCode;
-    var accessibility = req.body.accessibility;
-    var rating = req.body.rating;
-    var username = req.session.username;
-    var course_id  = await db.collection("courses").find({courseCode: courseCode}).project({courseId: 1})
+    var course_id = req.body.courseId;
     var difficulty = req.body.contentDifficulty;
     var workload = req.body.workloadRating;
     var text = req.body.reviewText;
-    insertReview(db, course_id, difficulty, workload, text, username, accessibility, rating);
+    var userId = 1;
+    insertReview(db, course_id, difficulty, workload, text, userId);
     return res.redirect('/');
   } catch (error) {
     req.flash('error', `Form submission error: ${error}`);
@@ -225,6 +222,12 @@ app.post("/review/", async (req, res) => {
 });
 
 // ===============End of Nya Work ==================================
+
+//================Start of Nico Work ===============================
+
+
+
+//================End of Nico Work =================================
 
 // ===============Given Code Below (Don't Delete yet)===============
 
