@@ -71,6 +71,41 @@ app.get('/', (req, res) => {
     return res.render('main.ejs', {loggedIn: loggedIn});
 });
 
+const DTB = 'RateMyCourse';
+app.get('/course/:cid', async (req, res) => {
+ 
+  const cid = req.params.cid;
+  const db = await Connection.open(mongoUri, DTB);
+
+  // Get course data
+  const courseList = await db.collection('courses').find({courseId: parseInt(cid)}).toArray();
+  // if (courseList.length === 0) {
+  //   return; //ELEPHANT
+  // }
+  const courseData = courseList[0]
+  // console.log("courseData", courseData)
+
+
+  // Get department name
+  const deptList = await db.collection('departments').find({departmentId: courseData.departmentId}).toArray();
+
+  // if (deptList.length === 0) {
+  //   return; //ELEPHANT
+  // }
+  const departmentName = deptList[0].departmentName;
+
+  // const reveiewList = db.collection('reviews').find({courseId: cid}).toArray();
+
+  return res.render("course.ejs", {courseHeader: `${courseData.courseCode}: ${courseData.courseName}`,
+                                  courseSubheader: `${departmentName} - Taught By: ${courseData.professorNames.join(", ")}`,
+                                  accessibilityStars: 5,
+                                  workloadStars: 2, 
+                                  contentStars: 4,
+                                  reviewList: []
+                                })
+
+})
+
 // ===============Beginning of Amy Work ============================
 const DBNAME = "RateMyCourse";
 const USERS = "users";
