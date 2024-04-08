@@ -14,8 +14,8 @@
 <form id="review"
       method="POST"
       action="/review/">
-     <label>Course ID: </label> 
-     <input placeholder="CS304" name="courseId"><br><br> 
+     <label>Course Code: </label> 
+     <input placeholder="CS304" name="courseCode"><br><br> 
      <label>Workload Rating: </label> 
      <Select name = workloadRating>
         <option value = 1>1</option>
@@ -26,6 +26,22 @@
      </Select><br><br> 
      <label>Content Difficulty Rating: </label> 
      <Select name = contentDifficulty>
+        <option value = 1>1</option>
+        <option value = 2>2</option>
+        <option value = 3>3</option>
+        <option value = 4>4</option>
+        <option value = 5>5</option>
+     </Select><br><br>
+     <label>Accessibility Rating: </label> 
+     <Select name = accessibility>
+        <option value = 1>1</option>
+        <option value = 2>2</option>
+        <option value = 3>3</option>
+        <option value = 4>4</option>
+        <option value = 5>5</option>
+     </Select><br><br>
+     <label>Overall Rating: </label> 
+     <Select name = rating>
         <option value = 1>1</option>
         <option value = 2>2</option>
         <option value = 3>3</option>
