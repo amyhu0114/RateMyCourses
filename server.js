@@ -96,12 +96,14 @@ app.get('/course/:cid', async (req, res) => {
 
   // const reveiewList = db.collection('reviews').find({courseId: cid}).toArray();
 
+  workloadStars = '★'*5 + '☆'*5-5;
+
   return res.render("course.ejs", {courseHeader: `${courseData.courseCode}: ${courseData.courseName}`,
                                   courseSubheader: `${departmentName} - Taught By: ${courseData.professorNames.join(", ")}`,
                                   accessibilityStars: 5,
                                   workloadStars: 2, 
                                   contentStars: 4,
-                                  reviewList: []
+                                  reviewList: ["rev"]
                                 })
 
 })
