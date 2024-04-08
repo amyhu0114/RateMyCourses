@@ -156,8 +156,8 @@ app.post("/join", async (req, res) => {
 // ===============End of Amy Work ==================================
 
 // ===============Beginning of Nya Work ============================
-function insertReview(db, courseId, date, difficulty, workload, text, userId){
-  let result = db.collection("reviews").insertOne({courseId: courseId, date: date, contentDifficulty: difficulty, workloadRating: workload, reviewText: text, userId: userId});
+function insertReview(db, courseId, difficulty, workload, text, userId){
+  let result = db.collection("reviews").insertOne({courseId: courseId, contentDifficulty: difficulty, workloadRating: workload, reviewText: text, userId: userId});
   return result;
 }
 
@@ -173,7 +173,7 @@ app.post("/review/", async (req, res) => {
     var workload = req.body.workloadRating;
     var text = req.body.reviewText;
     var userId = 1;
-    insertReview(db, course_id, date, difficulty, workload, text, userId);
+    insertReview(db, course_id, difficulty, workload, text, userId);
     return res.redirect('/');
   } catch (error) {
     req.flash('error', `Form submission error: ${error}`);
