@@ -155,6 +155,34 @@ app.post("/join", async (req, res) => {
   }
 // ===============End of Amy Work ==================================
 
+// ===============Beginning of Nya Work ============================
+function insertReview(db, courseId, date, difficulty, workload, text, userId){
+  let result = db.collection("reviews").insertOne({courseId: courseId, date: date, contentDifficulty: difficulty, workloadRating: workload, reviewText: text, userId: userId});
+  return result;
+}
+
+app.get('/review/', async (req, res) => {
+  res.render('makeReview.ejs');
+});
+
+app.post("/review/", async (req, res) => {
+  try {
+    const db = await Connection.open(mongoUri, DBNAME);
+    var course_id = req.body.courseId;
+    var difficulty = req.body.contentDifficulty;
+    var workload = req.body.workloadRating;
+    var text = req.body.reviewText;
+    var userId = 1;
+    insertReview(db, course_id, date, difficulty, workload, text, userId);
+    return res.redirect('/');
+  } catch (error) {
+    req.flash('error', `Form submission error: ${error}`);
+    return res.redirect('/')
+  }
+});
+
+// ===============End of Nya Work ==================================
+
 // ===============Given Code Below (Don't Delete yet)===============
 
 // // shows how logins might work by setting a value in the session
