@@ -108,9 +108,7 @@ app.get('/course/:cid', async (req, res) => {
 
 })
 
-app.get('/search/', async (req, res) => {
-  return res.render("searchResult.ejs", {searchResults: ['result1', 'result2']})
-})
+
 
 // ===============Beginning of Amy Work ============================
 const DBNAME = "RateMyCourse";
@@ -231,7 +229,11 @@ app.post("/review/", async (req, res) => {
 
 //================Start of Nico Work ===============================
 
-
+app.get('/search/', async (req, res) => {
+  let formData = req.query;
+  console.log(`you submitted ${formdata} to the search`)
+  return res.render("searchResult.ejs", {searchResults: ['result1', 'result2']})
+})
 
 //================End of Nico Work =================================
 
