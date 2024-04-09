@@ -230,7 +230,7 @@ app.post("/review/", async (req, res) => {
 //================Start of Nico Work ===============================
 
 app.get('/search/', async (req, res) => {
-  let formData = req.query;
+  let formData = req.query.term;
   console.log(`you submitted ${formdata} to the search`)
   return res.render("searchResult.ejs", {searchResults: ['result1', 'result2']})
 })
