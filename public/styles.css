@@ -95,3 +95,11 @@ figure figcaption {
   width: 80%;
   padding: 1em;
 }
+
+.searchResult {
+  border: 2px solid blue;
+  margin-left: 3em;
+  margin-bottom: 1em;
+  width: 90%;
+  padding: 1em;
+}

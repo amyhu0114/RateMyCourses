@@ -108,6 +108,10 @@ app.get('/course/:cid', async (req, res) => {
 
 })
 
+app.get('/search/', async (req, res) => {
+  return res.render("searchResult.ejs", {searchResults: ['result1', 'result2']})
+})
+
 // ===============Beginning of Amy Work ============================
 const DBNAME = "RateMyCourse";
 const USERS = "users";
