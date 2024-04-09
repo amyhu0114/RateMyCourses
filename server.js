@@ -198,7 +198,12 @@ function insertReview(db, courseId, difficulty, workload, text, userId){
   return result;
 }
 
-app.get('/review/', async (req, res) => {
+app.get('/review/', requiresLogin, async (req, res) => {
+  if (!req.session.loggedIn) {
+    req.flash('error', 'You are not logged in - please do so.');
+    console.log('You are not logged in - please do so.');
+    return res.redirect("/");
+  }
   res.render('makeReview.ejs');
 });
 
