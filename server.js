@@ -232,7 +232,31 @@ app.post("/review/", async (req, res) => {
 app.get('/search/', async (req, res) => {
   let formData = req.query.term;
   console.log(`you submitted ${formData} to the search`)
-  return res.render("searchResult.ejs", {searchResults: ['result1', 'result2']})
+
+  //create Regular expression to search
+  let customRegex = new RegExp(formData, 'i');
+
+  //open database connection
+  const db = await Connection.open(mongoUri, DBNAME);
+  const classDB = db.collection("classes");
+  console.log("successfully connected to database")
+  
+  //search database for term
+  let searchResults = classDB.find({courseID: customRegex}).toArray();
+  console.log("successfully queried database");
+
+  if(searchResults.length == 0){
+    req.flash('error', 'Sorry, your search did not return any results.');
+  }
+  else if(searchResults.length == 1){
+    let courseID = searchResults[0].courseId;
+    res.redirect('/course/'+courseId);
+  }
+  else if(searchResults.length >1){
+    return res.render("searchResult.ejs", {searchResults: searchResults})
+  }
+
+
 })
 
 //================End of Nico Work =================================
