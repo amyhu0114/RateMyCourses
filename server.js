@@ -231,7 +231,7 @@ app.post("/review/", async (req, res) => {
 
 app.get('/search/', async (req, res) => {
   let formData = req.query.term;
-  console.log(`you submitted ${formdata} to the search`)
+  console.log(`you submitted ${formData} to the search`)
   return res.render("searchResult.ejs", {searchResults: ['result1', 'result2']})
 })
 
