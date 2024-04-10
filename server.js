@@ -20,6 +20,8 @@ const multer = require('multer');
 
 const { Connection } = require('./connection');
 const cs304 = require('./cs304');
+const counter = require('./counter-utils.js')
+
 
 // Create and configure the app
 
@@ -73,6 +75,9 @@ app.get('/', (req, res) => {
 
 const DTB = 'RateMyCourse';
 app.get('/course/:cid', async (req, res) => {
+  // TO DO: make course star calc functions
+  // Standardize review dtb, add review text, poster, date, title?
+  // Make course look nice
  
   const cid = req.params.cid;
   const db = await Connection.open(mongoUri, DTB);
@@ -94,16 +99,26 @@ app.get('/course/:cid', async (req, res) => {
   // }
   const departmentName = deptList[0].departmentName;
 
-  // const reveiewList = db.collection('reviews').find({courseId: cid}).toArray();
+  const reviewData = await db.collection('reviews').find({courseId: parseInt(cid)}).toArray();
+  console.log(reviewData)
+  const reviewList = reviewData.map((reviewObj) => {
+    const workloadNum = parseInt(reviewObj.workloadRating);
+    const accessibilityNum = parseInt(reviewObj.contentDifficulty);
+    const contentNum = parseInt(reviewObj.accessibility);
 
-  workloadStars = '★'*5 + '☆'*5-5;
+    return {workloadStars: '★'.repeat(workloadNum) + '☆'.repeat(5-workloadNum),
+            accessibilityStars: '★'.repeat(accessibilityNum) + '☆'.repeat(5-accessibilityNum),
+            contentStars: '★'.repeat(contentNum) + '☆'.repeat(5-contentNum),
+            }
+  })
 
+  console.log(reviewList)
   return res.render("course.ejs", {courseHeader: `${courseData.courseCode}: ${courseData.courseName}`,
                                   courseSubheader: `${departmentName} - Taught By: ${courseData.professorNames.join(", ")}`,
                                   accessibilityStars: 5,
                                   workloadStars: 2, 
                                   contentStars: 4,
-                                  reviewList: ["rev"]
+                                  reviewList: reviewList
                                 })
 
 })

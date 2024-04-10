@@ -18,8 +18,12 @@
     </div>
 
     <div>
-        <% reviewList.forEach( (elt) => {  %>
-            <div class="courseCard">elt</div>
+        <% reviewList.forEach((rev) => {  %>
+            <div class="courseCard">
+                <p><%= rev.workloadStars %> Workload</p>
+                <p><%= rev.accessibilityStars %> Accessibility</p>
+                <p><%= rev.contentStars %> Content Difficulty</p>
+            </div>
         <% }); %>
     </div>
 </body>

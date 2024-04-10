@@ -93,7 +93,7 @@ figure figcaption {
   border: 2px solid blue;
   margin-left: 3em;
   width: 80%;
-  padding: 1em;
+  padding: 0.25em;
 }
 
 .searchResult {
