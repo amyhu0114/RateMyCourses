@@ -250,6 +250,7 @@ app.get('/search/', async (req, res) => {
 
   //create Regular expression to search
   let customRegex = new RegExp(formData, 'i');
+  console.log(customRegex);
 
   //open database connection
   const db = await Connection.open(mongoUri, DBNAME);
@@ -257,17 +258,20 @@ app.get('/search/', async (req, res) => {
   console.log("successfully connected to database")
   
   //search database for term
-  let searchResults = classDB.find({courseID: customRegex}).toArray();
+  let searchResults = await classDB.find({courseID: {$regex: customRegex}}).project({_id: 0, courseCode: 1}).toArray();
+  console.log(searchResults);
   console.log("successfully queried database");
 
   if(searchResults.length == 0){
     req.flash('error', 'Sorry, your search did not return any results.');
   }
-  else if(searchResults.length == 1){
-    let courseID = searchResults[0].courseId;
-    res.redirect('/course/'+courseId);
-  }
-  else if(searchResults.length >1){
+  // else if(searchResults.length == 1){
+  //   console.log("redirecting to course page");
+  //   let courseID = searchResults[0].courseId;
+  //   res.redirect('/course/'+courseId);
+  // }
+  else if(searchResults.length >= 1){
+    console.log("Search results identified");
     return res.render("searchResult.ejs", {searchResults: searchResults})
   }
 
