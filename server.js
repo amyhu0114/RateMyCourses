@@ -258,11 +258,12 @@ app.get('/search/', async (req, res) => {
   console.log("successfully connected to database")
   
   //search database for term
-  let searchResults = await classDB.find({courseID: {$regex: customRegex}}).project({_id: 0, courseCode: 1}).toArray();
+  let searchResults = await db.courses.find({courseCode: {$regex: customRegex}}).project({_id: 0, courseCode: 1}).toArray();
   console.log(searchResults);
   console.log("successfully queried database");
 
-  if(searchResults.length == 0){
+  if(searchResults == []){
+    console.log("no results identified");
     req.flash('error', 'Sorry, your search did not return any results.');
   }
   // else if(searchResults.length == 1){
