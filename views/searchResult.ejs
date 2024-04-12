@@ -24,11 +24,12 @@
     </form>
 
     <h1>Search Results:</h1>
-    <p>Search term: </p>
+    <p>You searched for: "<%= formData %>"</p>
+
 
     <div>
-        <% searchResults.forEach( (elt) => {  %>
-            <div class="searchResult">elt</div>
+        <% searchResults.forEach((elt) => {%>
+        <div class="searchResult"><a href = <%= elt[0] %>><%= elt[1] %></a></div>
         <% }); %>
     </div>
 
