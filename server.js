@@ -133,15 +133,19 @@ app.post("/join", async (req, res) => {
       const username = req.body.username;
       const password = req.body.password;
       const db = await Connection.open(mongoUri, DBNAME);
-      var existingUser = await db.collection(USERS).findOne({username: username});
+      var existingUser = await db.collection(USERS).findOne({userName: username});
       if (existingUser) {
         req.flash('error', "Login already exists - please try logging in instead.");
         console.log("Login already exists - please try logging in instead.");
         return res.redirect('/')
       }
       const hash = await bcrypt.hash(password, ROUNDS);
+      
+      const counterCol = db.collection('counters');
+      var uID = await counter.incrCounter(counterCol, USERS);
       await db.collection(USERS).insertOne({
-          username: username,
+          userId: uID,
+          userName: username,
           hash: hash
       });
       console.log('successfully joined', username, password, hash);
@@ -160,7 +164,7 @@ app.post("/join", async (req, res) => {
       const username = req.body.username;
       const password = req.body.password;
       const db = await Connection.open(mongoUri, DBNAME);
-      var existingUser = await db.collection(USERS).findOne({username: username});
+      var existingUser = await db.collection(USERS).findOne({userName: username});
       console.log('user', existingUser);
       if (!existingUser) {
         req.flash('error', "Username does not exist - try again.");
@@ -179,7 +183,7 @@ app.post("/join", async (req, res) => {
       req.session.username = username;
       req.session.loggedIn = true;
       console.log('login as', username);
-      return res.redirect('/form');
+      return res.redirect('/');
     } catch (error) {
       req.flash('error', `Form submission error: ${error}`);
       console.log(`Form submission error: ${error}`);
