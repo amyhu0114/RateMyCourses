@@ -152,7 +152,7 @@ app.post("/join", async (req, res) => {
       req.flash('info', 'successfully joined and logged in as ' + username);
       req.session.username = username;
       req.session.loggedIn = true;
-      return res.redirect('/form');
+      return res.redirect('/');
     } catch (error) {
       req.flash('error', `Form submission error: ${error}`);
       return res.redirect('/')
