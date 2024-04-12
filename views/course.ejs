@@ -9,6 +9,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 </head>
 <body>
+    <%- include("partials/navbar.ejs", {loggedIn: loggedIn}) %>
+
     <div>
         <h1><%= courseHeader %></h1>
         <p><%= courseSubheader %></p>

@@ -237,6 +237,7 @@ app.post("/review/", async (req, res) => {
     var text = req.body.reviewText;
     var userId = 1;
     insertReview(db, course_id, difficulty, workload, text, userId);
+    req.flash("info", "You have successfully submitted a review!");
     return res.redirect('/');
   } catch (error) {
     req.flash('error', `Form submission error: ${error}`);
