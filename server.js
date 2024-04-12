@@ -250,7 +250,7 @@ app.get('/search/', async (req, res) => {
 
   //create Regular expression to search
   let customRegex = new RegExp(formData, 'i');
-  console.log(customRegex);
+  //console.log(customRegex);
 
   //open database connection
   const db = await Connection.open(mongoUri, DBNAME);
@@ -258,26 +258,38 @@ app.get('/search/', async (req, res) => {
   console.log("successfully connected to database")
   
   //search database for term
-  let searchResults = await db.courses.find({courseCode: {$regex: customRegex}}).project({_id: 0, courseCode: 1}).toArray();
+  let searchResults = await db.collection("courses").find({courseCode: {$regex: customRegex}}).project({_id: 0, courseCode: 1, courseId: 1}).toArray();
   console.log(searchResults);
   console.log("successfully queried database");
 
-  if(searchResults == []){
+  //handle no search results
+  if(searchResults.length <1){
     console.log("no results identified");
     req.flash('error', 'Sorry, your search did not return any results.');
+    console.log("flashed");
+    return res.redirect("/");
   }
-  // else if(searchResults.length == 1){
-  //   console.log("redirecting to course page");
-  //   let courseID = searchResults[0].courseId;
-  //   res.redirect('/course/'+courseId);
-  // }
+
+  //handle one to multiple results
   else if(searchResults.length >= 1){
     console.log("Search results identified");
-    return res.render("searchResult.ejs", {searchResults: searchResults})
+    let searchStrings = [];
+    searchResults.forEach(((elt) => searchStrings.push(searchLinkGenerator(elt))));
+    console.log(searchStrings);
+    return res.render("searchResult.ejs", {searchResults: searchStrings, formData: formData})
   }
-
-
 })
+/**
+ * Function for generating search results with clickable hyperlinks
+ * @param {*} searchResult tuple containing coursecode and coursename info from database
+ * @returns hyperlink and class name to be displayed on site
+ */
+function searchLinkGenerator(searchResult) {
+  let className = searchResult.courseCode;
+  let courseID = searchResult.courseId
+  console.log(`/course/${courseID}`, `${className}`);
+  return [`/course/${courseID}`, `${className}`]
+}
 
 //================End of Nico Work =================================
 
