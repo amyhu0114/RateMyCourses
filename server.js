@@ -133,22 +133,26 @@ app.post("/join", async (req, res) => {
       const username = req.body.username;
       const password = req.body.password;
       const db = await Connection.open(mongoUri, DBNAME);
-      var existingUser = await db.collection(USERS).findOne({username: username});
+      var existingUser = await db.collection(USERS).findOne({userName: username});
       if (existingUser) {
         req.flash('error', "Login already exists - please try logging in instead.");
         console.log("Login already exists - please try logging in instead.");
         return res.redirect('/')
       }
       const hash = await bcrypt.hash(password, ROUNDS);
+      
+      const counterCol = db.collection('counters');
+      var uID = await counter.incrCounter(counterCol, USERS);
       await db.collection(USERS).insertOne({
-          username: username,
+          userId: uID,
+          userName: username,
           hash: hash
       });
       console.log('successfully joined', username, password, hash);
       req.flash('info', 'successfully joined and logged in as ' + username);
       req.session.username = username;
       req.session.loggedIn = true;
-      return res.redirect('/form');
+      return res.redirect('/');
     } catch (error) {
       req.flash('error', `Form submission error: ${error}`);
       return res.redirect('/')
@@ -160,7 +164,7 @@ app.post("/join", async (req, res) => {
       const username = req.body.username;
       const password = req.body.password;
       const db = await Connection.open(mongoUri, DBNAME);
-      var existingUser = await db.collection(USERS).findOne({username: username});
+      var existingUser = await db.collection(USERS).findOne({userName: username});
       console.log('user', existingUser);
       if (!existingUser) {
         req.flash('error', "Username does not exist - try again.");
@@ -179,7 +183,7 @@ app.post("/join", async (req, res) => {
       req.session.username = username;
       req.session.loggedIn = true;
       console.log('login as', username);
-      return res.redirect('/form');
+      return res.redirect('/');
     } catch (error) {
       req.flash('error', `Form submission error: ${error}`);
       console.log(`Form submission error: ${error}`);
@@ -233,6 +237,7 @@ app.post("/review/", async (req, res) => {
     var text = req.body.reviewText;
     var userId = req.body
     insertReview(db, course_id, difficulty, workload, text, userId);
+    req.flash("info", "You have successfully submitted a review!");
     return res.redirect('/');
   } catch (error) {
     req.flash('error', `Form submission error: ${error}`);
@@ -250,6 +255,7 @@ app.get('/search/', async (req, res) => {
 
   //create Regular expression to search
   let customRegex = new RegExp(formData, 'i');
+  //console.log(customRegex);
 
   //open database connection
   const db = await Connection.open(mongoUri, DBNAME);
@@ -257,22 +263,38 @@ app.get('/search/', async (req, res) => {
   console.log("successfully connected to database")
   
   //search database for term
-  let searchResults = classDB.find({courseID: customRegex}).toArray();
+  let searchResults = await db.collection("courses").find({courseCode: {$regex: customRegex}}).project({_id: 0, courseCode: 1, courseId: 1}).toArray();
+  console.log(searchResults);
   console.log("successfully queried database");
 
-  if(searchResults.length == 0){
+  //handle no search results
+  if(searchResults.length <1){
+    console.log("no results identified");
     req.flash('error', 'Sorry, your search did not return any results.');
-  }
-  else if(searchResults.length == 1){
-    let courseID = searchResults[0].courseId;
-    res.redirect('/course/'+courseId);
-  }
-  else if(searchResults.length >1){
-    return res.render("searchResult.ejs", {searchResults: searchResults})
+    console.log("flashed");
+    return res.redirect("/");
   }
 
-
+  //handle one to multiple results
+  else if(searchResults.length >= 1){
+    console.log("Search results identified");
+    let searchStrings = [];
+    searchResults.forEach(((elt) => searchStrings.push(searchLinkGenerator(elt))));
+    console.log(searchStrings);
+    return res.render("searchResult.ejs", {searchResults: searchStrings, formData: formData})
+  }
 })
+/**
+ * Function for generating search results with clickable hyperlinks
+ * @param {*} searchResult tuple containing coursecode and coursename info from database
+ * @returns hyperlink and class name to be displayed on site
+ */
+function searchLinkGenerator(searchResult) {
+  let className = searchResult.courseCode;
+  let courseID = searchResult.courseId
+  console.log(`/course/${courseID}`, `${className}`);
+  return [`/course/${courseID}`, `${className}`]
+}
 
 //================End of Nico Work =================================
 

@@ -81,6 +81,7 @@ figure figcaption {
 #hp  {
   float: right;    
    margin: 0 0 0 100px;
+  width: 700px;
 }
 
 #revealbutton {
@@ -103,3 +104,4 @@ figure figcaption {
   width: 90%;
   padding: 1em;
 }
+
