@@ -151,6 +151,7 @@ app.post("/join", async (req, res) => {
       console.log('successfully joined', username, password, hash);
       req.flash('info', 'successfully joined and logged in as ' + username);
       req.session.username = username;
+      req.session.userId = uID
       req.session.loggedIn = true;
       return res.redirect('/');
     } catch (error) {
@@ -181,6 +182,7 @@ app.post("/join", async (req, res) => {
       req.flash('info', 'successfully logged in as ' + username);
       console.log('successfully logged in as ' + username);
       req.session.username = username;
+      req.session.userId = existingUser.userId
       req.session.loggedIn = true;
       console.log('login as', username);
       return res.redirect('/');
@@ -194,6 +196,7 @@ app.post("/join", async (req, res) => {
   app.post('/logout', (req,res) => {
     if (req.session.username) {
       req.session.username = null;
+      req.session.userId = null
       req.session.loggedIn = false;
       req.flash('info', 'You are logged out');
       return res.redirect('/');
@@ -214,8 +217,8 @@ app.post("/join", async (req, res) => {
 // ===============End of Amy Work ==================================
 
 // ===============Beginning of Nya Work ============================
-function insertReview(db, courseId, difficulty, workload, text, userId){
-  let result = db.collection("reviews").insertOne({courseId: courseId, contentDifficulty: difficulty, workloadRating: workload, reviewText: text, userId: userId});
+function insertReview(db, courseId, difficulty, workload, text, userId, rating, accessibility){
+  let result = db.collection("reviews").insertOne({courseId: courseId, contentDifficulty: difficulty, workloadRating: workload, reviewText: text, userId: userId, overallRating: rating, accessibilityRating: accessibility});
   return result;
 }
 
@@ -225,7 +228,9 @@ app.get('/review/', requiresLogin, async (req, res) => {
     console.log('You are not logged in - please do so.');
     return res.redirect("/");
   }
-  res.render('makeReview.ejs');
+  const db = await Connection.open(mongoUri, DBNAME);
+  var courses = await db.collection("courses").find({}).toArray();
+  res.render('makeReview.ejs', {courses: courses});
 });
 
 app.post("/review/", async (req, res) => {
@@ -233,12 +238,47 @@ app.post("/review/", async (req, res) => {
     const db = await Connection.open(mongoUri, DBNAME);
     var course_id = req.body.courseId;
     var difficulty = req.body.contentDifficulty;
+    var accessibility = req.body.accessibility;
+    var rating = req.body.rating;
     var workload = req.body.workloadRating;
     var text = req.body.reviewText;
-    var userId = req.body
-    insertReview(db, course_id, difficulty, workload, text, userId);
+    var userId = req.session.userId
+    insertReview(db, course_id, difficulty, workload, text, userId, rating, accessibility);
     req.flash("info", "You have successfully submitted a review!");
     return res.redirect('/');
+  } catch (error) {
+    req.flash('error', `Form submission error: ${error}`);
+    return res.redirect('/')
+  }
+});
+
+function insertCourse(db, course_id, course_name, course_code, department_id, professor_list){
+  let result = db.collection("courses").insertOne({courseId: course_id, courseName: course_name, courseCode: course_code, departmentId: department_id, professorNames: professor_list});
+  return result;
+}
+
+app.get('/inputCourse/', requiresLogin, async (req, res) => {
+  if (!req.session.loggedIn) {
+    req.flash('error', 'You are not logged in - please do so.');
+    console.log('You are not logged in - please do so.');
+    return res.redirect("/");
+  }
+  const db = await Connection.open(mongoUri, DBNAME);
+  var departments = await db.collection("departments").find({}).toArray();
+  res.render('makeCourse.ejs', {departments: departments});
+});
+
+app.post("/inputCourse/", async (req, res) => {
+  try {
+    const db = await Connection.open(mongoUri, DBNAME);
+    var course_id = req.body.courseId;
+    var course_name = req.body.courseName;
+    var course_code = req.body.courseCode;
+    var department_id = req.body.department;
+    var userId = req.session.userId;
+    insertCourse(db, course_id, course_name, course_code, department_id, []);
+    req.flash("info", "You have successfully submitted a Course!");
+    return res.redirect('/review/');
   } catch (error) {
     req.flash('error', `Form submission error: ${error}`);
     return res.redirect('/')

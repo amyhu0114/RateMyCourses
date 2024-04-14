@@ -17,44 +17,53 @@
 <form id="review"
       method="POST"
       action="/review/">
-     <label>Course Code: </label> 
-     <input placeholder="CS304" name="courseCode"><br><br> 
-     <label>Workload Rating: </label> 
-     <Select name = workloadRating>
-        <option value = 1>1</option>
-        <option value = 2>2</option>
-        <option value = 3>3</option>
-        <option value = 4>4</option>
-        <option value = 5>5</option>
-     </Select><br><br> 
-     <label>Content Difficulty Rating: </label> 
-     <Select name = contentDifficulty>
-        <option value = 1>1</option>
-        <option value = 2>2</option>
-        <option value = 3>3</option>
-        <option value = 4>4</option>
-        <option value = 5>5</option>
-     </Select><br><br>
-     <label>Accessibility Rating: </label> 
-     <Select name = accessibility>
-        <option value = 1>1</option>
-        <option value = 2>2</option>
-        <option value = 3>3</option>
-        <option value = 4>4</option>
-        <option value = 5>5</option>
-     </Select><br><br>
-     <label>Overall Rating: </label> 
-     <Select name = rating>
-        <option value = 1>1</option>
-        <option value = 2>2</option>
-        <option value = 3>3</option>
-        <option value = 4>4</option>
-        <option value = 5>5</option>
-     </Select><br><br>
-     <label>Review:
-            <textarea rows="5" cols="30" name="reviewText"></textarea>
-    </label>     
+     <label>Course: </label> 
+     <select name="courseId">
+      <option value="" disabled selected>Choose one</option>
+      <!-- making an option for each course in the list-->
+      <% courses.forEach( course => {%>
+          <option value = "<%=course.courseId%>" > <%=course.courseCode%>: <%=course.courseName%> </option>
+      <% }) %>
+    </select><br><br>
+    <p>Workload Rating: 
+    <label>1<input type="radio" name = "workloadRating"  value = 1></label>
+    <label>2<input type="radio" name = "workloadRating" value = 2></label>
+    <label>3<input type="radio" name = "workloadRating" value = 3></label>
+    <label>4<input type="radio" name = "workloadRating" value = 4></label>
+    <label>5<input type="radio" name = "workloadRating" value = 5></label>
+    </p>
+     <p>Content Difficulty Rating:  
+     <label>1<input type="radio" name = "contentDifficulty" value = 1></label>
+    <label>2<input type="radio" name = "contentDifficulty" value = 2></label>
+    <label>3<input type="radio" name = "contentDifficulty" value = 3></label>
+    <label>4<input type="radio" name = "contentDifficulty" value = 4></label>
+    <label>5<input type="radio" name = "contentDifficulty" value = 5></label>
+    </p>
+    <p>Accessibility Rating:  
+    <label>1<input type="radio" name = "accessibility" value = 1></label>
+    <label>2<input type="radio" name = "accessibility" value = 2></label>
+    <label>3<input type="radio" name = "accessibility" value = 3></label>
+    <label>4<input type="radio" name = "accessibility" value = 4></label>
+    <label>5<input type="radio" name = "accessibility" value = 5></label>
+    </p>
+    <p>Overall Rating:     
+    <label>1<input type="radio" name = "rating" value = 1></label>
+    <label>2<input type="radio" name = "rating" value = 2></label>
+    <label>3<input type="radio" name = "rating" value = 3></label>
+    <label>4<input type="radio" name = "rating" value = 4></label>
+    <label>5<input type="radio" name = "rating" value = 5></label>
+    </p>
+    <br>
+     <p>Review:</p>
+    <textarea rows="5" cols="30" name="reviewText"></textarea>    
   <p><button type="submit">Submit</button></p>
+</form>
+<form
+id="new course"
+method="GET"
+action="/inputCourse/" >
+   <p>Course missing?</p>
+   <button type="submit">Add a new Course!</button>
 </form>
 
     <!-- load local js -->
