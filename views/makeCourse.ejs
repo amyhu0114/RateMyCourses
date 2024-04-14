@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Make Review</title>
+    <!-- load local stylesheet (css) -->
+    <link rel="stylesheet" href="/styles.css" />
+    <!-- loading jquery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+   <%- include("partials/navbar.ejs", {loggedIn: loggedIn}) %>
+
+   <%- include("partials/flashes.ejs") %>
+    <h1>Submit a Review</h1>
+
+<form id="review"
+      method="POST"
+      action="/review/">
+     <label>Course ID: </label> 
+     <input placeholder=123" name="courseId"><br><br>
+     <label>Course Name: </label> 
+     <input placeholder="Databases with Web Interfaces" name="courseName"><br><br> 
+     <label>Course Code: </label> 
+     <input placeholder="CS304" name="courseCode"><br><br>
+     <Select name = department>
+        <% departments.forEach( (department) => {%>
+            <option value = <%= department.Id %>><%= department.name %></option>
+        <% }); %>
+     </Select><br><br>
+     <ol>
+        <% list.forEach( (elt) => {%>
+        <li><%= elt.name %></li>
+        <% }); %>
+    </ol>
+  <p><button type="submit">Submit</button></p>
+</form>
+
+    <!-- load local js -->
+    <script src="/main.js"></script>
+</body>
+</html>

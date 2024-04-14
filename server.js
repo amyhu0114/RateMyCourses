@@ -231,7 +231,7 @@ app.post("/review/", async (req, res) => {
     var difficulty = req.body.contentDifficulty;
     var workload = req.body.workloadRating;
     var text = req.body.reviewText;
-    var userId = 1;
+    var userId = req.body
     insertReview(db, course_id, difficulty, workload, text, userId);
     return res.redirect('/');
   } catch (error) {
