@@ -218,7 +218,7 @@ app.post("/join", async (req, res) => {
 
 // ===============Beginning of Nya Work ============================
 function insertReview(db, courseId, difficulty, workload, text, userId, rating, accessibility){
-  let result = db.collection("reviews").insertOne({courseId: courseId, contentDifficulty: difficulty, workloadRating: workload, reviewText: text, userId: parseInt(userId), overallRating: rating, accessibilityRating: accessibility});
+  let result = db.collection("reviews").insertOne({courseId: parseInt(courseId), contentDifficulty: parseInt(difficulty), workloadRating: parseInt(workload), reviewText: text, userId: parseInt(userId), overallRating: parseInt(rating), accessibilityRating: parseInt(accessibility)});
   return result;
 }
 
