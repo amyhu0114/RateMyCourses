@@ -218,7 +218,7 @@ app.post("/join", async (req, res) => {
 
 // ===============Beginning of Nya Work ============================
 function insertReview(db, courseId, difficulty, workload, text, userId, rating, accessibility){
-  let result = db.collection("reviews").insertOne({courseId: courseId, contentDifficulty: difficulty, workloadRating: workload, reviewText: text, userId: userId, overallRating: rating, accessibilityRating: accessibility});
+  let result = db.collection("reviews").insertOne({courseId: courseId, contentDifficulty: difficulty, workloadRating: workload, reviewText: text, userId: parseInt(userId), overallRating: rating, accessibilityRating: accessibility});
   return result;
 }
 
@@ -253,7 +253,7 @@ app.post("/review/", async (req, res) => {
 });
 
 function insertCourse(db, course_id, course_name, course_code, department_id, professor_list){
-  let result = db.collection("courses").insertOne({courseId: course_id, courseName: course_name, courseCode: course_code, departmentId: department_id, professorNames: professor_list});
+  let result = db.collection("courses").insertOne({courseId: parseInt(course_id), courseName: course_name, courseCode: course_code, departmentId: parseInt(department_id), professorNames: professor_list});
   return result;
 }
 
