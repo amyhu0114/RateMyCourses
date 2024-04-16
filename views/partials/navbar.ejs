@@ -2,6 +2,7 @@
   <div class="topnav">
     <a class="active" href="/">Home</a>
     <a href="/review/">Make Review</a>
+    <!-- Dynamic navbar that shows user profile and log out when the user is logged in; and sign up and log in when the user is not logged in -->
     <% if(loggedIn){ %>
       <a href="/">Profile</a>
       <p><form action="/logout" method="POST">
