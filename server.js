@@ -128,20 +128,25 @@ app.get('/course/:cid', async (req, res) => {
 // ===============Beginning of Amy Work ============================
 const DBNAME = "RateMyCourse";
 const USERS = "users";
+// POST Handler to enable signup
 app.post("/join", async (req, res) => {
     try {
+      // obtain user-entered username and password from the sign up form
       const username = req.body.username;
       const password = req.body.password;
       const db = await Connection.open(mongoUri, DBNAME);
+      // check if the username is already in use
       var existingUser = await db.collection(USERS).findOne({userName: username});
       if (existingUser) {
         req.flash('error', "Login already exists - please try logging in instead.");
         console.log("Login already exists - please try logging in instead.");
         return res.redirect('/')
       }
+
+      // given that the username does not exist, hash the password and add the user (userID, userName, hashed passwrod) to the user database
       const hash = await bcrypt.hash(password, ROUNDS);
-      
       const counterCol = db.collection('counters');
+      // use the counter module to generate the next userID
       var uID = await counter.incrCounter(counterCol, USERS);
       await db.collection(USERS).insertOne({
           userId: uID,
@@ -150,6 +155,7 @@ app.post("/join", async (req, res) => {
       });
       console.log('successfully joined', username, password, hash);
       req.flash('info', 'successfully joined and logged in as ' + username);
+      // set the username and userID of the session and set loggedIn of the session to true
       req.session.username = username;
       req.session.userId = uID
       req.session.loggedIn = true;
@@ -160,11 +166,14 @@ app.post("/join", async (req, res) => {
     }
   });
   
+  // POST handler to enable login
   app.post("/login", async (req, res) => {
     try {
+      // obtain user-entered username and password from the sign up form
       const username = req.body.username;
       const password = req.body.password;
       const db = await Connection.open(mongoUri, DBNAME);
+      // checks if the username matches any existing account
       var existingUser = await db.collection(USERS).findOne({userName: username});
       console.log('user', existingUser);
       if (!existingUser) {
@@ -172,6 +181,7 @@ app.post("/join", async (req, res) => {
         console.log("Username does not exist - try again.");
        return res.redirect('/')
       }
+      // given that the username exists, compare the hashed password stored in database with the hashed version of the password entered by the user
       const match = await bcrypt.compare(password, existingUser.hash); 
       console.log('match', match);
       if (!match) {
@@ -181,6 +191,7 @@ app.post("/join", async (req, res) => {
       }
       req.flash('info', 'successfully logged in as ' + username);
       console.log('successfully logged in as ' + username);
+      // set the username and userID of the session and set loggedIn of the session to true
       req.session.username = username;
       req.session.userId = existingUser.userId
       req.session.loggedIn = true;
@@ -193,8 +204,10 @@ app.post("/join", async (req, res) => {
     }
   });
   
+  // POST handler to enable log out
   app.post('/logout', (req,res) => {
     if (req.session.username) {
+      // nullify the username and userID of the session and set loggedIn of the session to false
       req.session.username = null;
       req.session.userId = null
       req.session.loggedIn = false;
@@ -206,7 +219,9 @@ app.post("/join", async (req, res) => {
     }
   });
 
+  // function that ensure the user is logged in to be called by any endpoints that requires login
   function requiresLogin(req, res, next) {
+    // if the user is not logged in, flash the error and redirect to home
     if (!req.session.loggedIn) {
       req.flash('error', 'This page requires you to be logged in - please do so.');
       return res.redirect("/");
