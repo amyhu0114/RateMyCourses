@@ -337,6 +337,12 @@ app.post("/inputCourse/", async (req, res) => {
 
 //================Start of Nico Work ===============================
 
+/**
+ * Route to find search results when a search term is submitted on the home page. 
+ * Opens a database connection, queries for search term, and then responds appropriately.
+ * If search results are identified, the route will render the search page, if no search results are detected,
+ * it will redirect to the homepage and flash an error. 
+ */
 app.get('/search/', async (req, res) => {
   let formData = req.query.term;
   console.log(`you submitted ${formData} to the search`)
