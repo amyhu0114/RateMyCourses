@@ -232,11 +232,19 @@ app.post("/join", async (req, res) => {
 // ===============End of Amy Work ==================================
 
 // ===============Beginning of Nya Work ============================
+/* funtion to insert reviews, 
+  takes in database, courseID, difficulty, workload, review text, userId, rating, and accessibility
+  returns a promise to update the database
+  Helper function for the Post handler of the /review/ page
+*/
 function insertReview(db, courseId, difficulty, workload, text, userId, rating, accessibility){
   let result = db.collection("reviews").insertOne({courseId: parseInt(courseId), contentDifficulty: parseInt(difficulty), workloadRating: parseInt(workload), reviewText: text, userId: parseInt(userId), overallRating: parseInt(rating), accessibilityRating: parseInt(accessibility)});
   return result;
 }
 
+/* Get handler for the /review/ page.
+Renders the makeReview.ejs page, with the courses in the database as options for courses to review
+*/
 app.get('/review/', requiresLogin, async (req, res) => {
   if (!req.session.loggedIn) {
     req.flash('error', 'You are not logged in - please do so.');
@@ -244,13 +252,18 @@ app.get('/review/', requiresLogin, async (req, res) => {
     return res.redirect("/");
   }
   const db = await Connection.open(mongoUri, DBNAME);
+  //finds courses to feed into rendering of makeReview.ejs page
   var courses = await db.collection("courses").find({}).toArray();
   res.render('makeReview.ejs', {courses: courses});
 });
 
+/* Post handler for the /review/ page to enable form submission 
+  Inserts a review into the database, with the information submitted in the form
+*/
 app.post("/review/", async (req, res) => {
   try {
     const db = await Connection.open(mongoUri, DBNAME);
+    //getting relevant variables
     var course_id = req.body.courseId;
     var difficulty = req.body.contentDifficulty;
     var accessibility = req.body.accessibility;
@@ -258,43 +271,63 @@ app.post("/review/", async (req, res) => {
     var workload = req.body.workloadRating;
     var text = req.body.reviewText;
     var userId = req.session.userId
+    //inserting the review
     insertReview(db, course_id, difficulty, workload, text, userId, rating, accessibility);
+    //flashing verification that the review is submitted, and redirecting to the home page
     req.flash("info", "You have successfully submitted a review!");
     return res.redirect('/');
   } catch (error) {
+    //error handler, redirects to home page
     req.flash('error', `Form submission error: ${error}`);
     return res.redirect('/')
   }
 });
 
+/* funtion to insert courses, helper function for the /inputCourse/ POST handler
+  takes in database, courseID, course name, course code, department id, and a list of professors
+  returns a promise to update the database
+*/
 function insertCourse(db, course_id, course_name, course_code, department_id, professor_list){
   let result = db.collection("courses").insertOne({courseId: parseInt(course_id), courseName: course_name, courseCode: course_code, departmentId: parseInt(department_id), professorNames: professor_list});
   return result;
 }
 
+/* get handler for /inputCourse/ page
+The input course button on the /review/ page, redirects to this page
+renders the makeCourse.ejs form, with the available departments as options on the form
+*/
 app.get('/inputCourse/', requiresLogin, async (req, res) => {
   if (!req.session.loggedIn) {
+    //flashes error and does not let you access this page if you are not logged in
     req.flash('error', 'You are not logged in - please do so.');
     console.log('You are not logged in - please do so.');
     return res.redirect("/");
   }
   const db = await Connection.open(mongoUri, DBNAME);
+  //finds departments to put in the ejs form when rendering
   var departments = await db.collection("departments").find({}).toArray();
   res.render('makeCourse.ejs', {departments: departments});
 });
 
+/* POST handler for /inputCourse/
+  inserts a course into the database, with the data inputted in the form
+  Redirects to teh review page
+*/
 app.post("/inputCourse/", async (req, res) => {
   try {
     const db = await Connection.open(mongoUri, DBNAME);
+    //getting the relevant variables
     var course_id = req.body.courseId;
     var course_name = req.body.courseName;
     var course_code = req.body.courseCode;
     var department_id = req.body.department;
-    var userId = req.session.userId;
+    //inserting the course
     insertCourse(db, course_id, course_name, course_code, department_id, []);
+    //flashing and redirecting after insertion
     req.flash("info", "You have successfully submitted a Course!");
     return res.redirect('/review/');
   } catch (error) {
+    //Error handler, redirects to home page, and flashes the error
     req.flash('error', `Form submission error: ${error}`);
     return res.redirect('/')
   }
