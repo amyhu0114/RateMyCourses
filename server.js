@@ -83,6 +83,11 @@ function makeStars(starNum) {
   return '★'.repeat(starNum) + '☆'.repeat(5-starNum);
 }
 
+/**
+ * Takes review data from database, formats relevant data.
+ * @param {Array} reviewData 
+ * @returns {Array}
+ */
 function formatReveiws(reviewData) {
   // Get relevant review data
   const reviewList = reviewData.map((reviewObj) => {
@@ -126,8 +131,7 @@ app.get('/course/:cid', async (req, res) => {
 
   // Get review data
   const reviewData = await db.collection('reviews').find({courseId: parseInt(cid)}).toArray();
-
-  
+  const reviewList = formatReveiws(reviewData);
 
   // Get session data
   const loggedIn = (req.session.loggedIn) || false;
