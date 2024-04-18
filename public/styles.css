@@ -16,7 +16,7 @@ h3 {
 }
 
 p {
-  color: rgb(0, 82, 0);
+  /* color: rgb(0, 82, 0); */
   margin-left: 40px;
 }
 
@@ -93,8 +93,10 @@ figure figcaption {
 .courseCard {
   border: 2px solid blue;
   margin-left: 3em;
+  margin-bottom: 1em;
   width: 80%;
   padding: 0.25em;
+  padding-bottom: 1em;
 }
 
 .searchResult {
@@ -105,3 +107,25 @@ figure figcaption {
   padding: 1em;
 }
 
+.reviewTitle {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.container {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.container p {
+  margin-top: 0em;
+  margin-bottom: 0em;
+}
+
+#errors p {
+  color: red;
+}
+
+#info p {
+  color: orange;
+}

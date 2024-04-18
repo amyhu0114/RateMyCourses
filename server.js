@@ -74,55 +74,69 @@ app.get('/', (req, res) => {
 });
 
 const DTB = 'RateMyCourse';
+
+function makeStars(starNum) {
+  return '★'.repeat(starNum) + '☆'.repeat(5-starNum);
+}
+
 app.get('/course/:cid', async (req, res) => {
-  // TO DO: make course star calc functions
-  // Standardize review dtb, add review text, poster, date, title?
-  // Make course look nice
- 
+  // Set relevant variables
   const cid = req.params.cid;
   const db = await Connection.open(mongoUri, DTB);
 
   // Get course data
   const courseList = await db.collection('courses').find({courseId: parseInt(cid)}).toArray();
-  // if (courseList.length === 0) {
-  //   return; //ELEPHANT
-  // }
+  if (courseList.length === 0) {
+    req.flash('error', `Course with courseId ${cid} not found!`);
+    return res.redirect("/");
+  }
   const courseData = courseList[0]
-  // console.log("courseData", courseData)
 
-
-  // Get department name
+  // Get department data
   const deptList = await db.collection('departments').find({departmentId: courseData.departmentId}).toArray();
-
-  // if (deptList.length === 0) {
-  //   return; //ELEPHANT
-  // }
+  if (deptList.length === 0) {
+    req.flash('error', `Department with departmentId ${courseData.departmentId} not found!`);
+    return res.redirect("/");
+  }
   const departmentName = deptList[0].departmentName;
 
+  // Get review data
   const reviewData = await db.collection('reviews').find({courseId: parseInt(cid)}).toArray();
-  console.log(reviewData)
-  const reviewList = reviewData.map((reviewObj) => {
-    const workloadNum = parseInt(reviewObj.workloadRating);
-    const accessibilityNum = parseInt(reviewObj.contentDifficulty);
-    const contentNum = parseInt(reviewObj.accessibility);
 
-    return {workloadStars: '★'.repeat(workloadNum) + '☆'.repeat(5-workloadNum),
-            accessibilityStars: '★'.repeat(accessibilityNum) + '☆'.repeat(5-accessibilityNum),
-            contentStars: '★'.repeat(contentNum) + '☆'.repeat(5-contentNum),
+  const reviewList = reviewData.map((reviewObj) => {
+    // Must parseInt since data wasn't consistently integers for a while
+    const workloadNum = parseInt(reviewObj.workloadRating);
+    const accessibilityNum = parseInt(reviewObj.accessibilityRating);
+    const contentNum = parseInt(reviewObj.contentDifficulty);
+    const overallNum = parseInt(reviewObj.overallRating);
+
+    return {workloadStars: makeStars(workloadNum),
+            accessibilityStars: makeStars(accessibilityNum),
+            contentStars: makeStars(contentNum),
+            overallStars:makeStars(overallNum),
+            text: reviewObj.reviewText,
             }
   })
 
-  console.log(reviewList)
+  // Get session data
+  const loggedIn = (req.session.loggedIn) || false;
+
+  // TO DO IN ALPHA: implement summing for course ratings from avg of reviews
   return res.render("course.ejs", {courseHeader: `${courseData.courseCode}: ${courseData.courseName}`,
                                   courseSubheader: `${departmentName} - Taught By: ${courseData.professorNames.join(", ")}`,
-                                  accessibilityStars: 5,
-                                  workloadStars: 2, 
-                                  contentStars: 4,
-                                  reviewList: reviewList
+                                  overallStars: makeStars(4),
+                                  accessibilityStars: makeStars(5),
+                                  workloadStars: makeStars(2), 
+                                  contentStars: makeStars(4),
+                                  reviewList: reviewList,
+                                  loggedIn: loggedIn
                                 })
 
 })
 
+app.get("/profile/", async (req, res) => {
+  return res.render("profile.ejs");
+})
 
 
 // ===============Beginning of Amy Work ============================
@@ -254,13 +268,17 @@ app.get('/review/', requiresLogin, async (req, res) => {
   const db = await Connection.open(mongoUri, DBNAME);
   //finds courses to feed into rendering of makeReview.ejs page
   var courses = await db.collection("courses").find({}).toArray();
-  res.render('makeReview.ejs', {courses: courses});
+  const loggedIn = (req.session.loggedIn) || false;
+  res.render('makeReview.ejs', {courses: courses,
+                                loggedIn: loggedIn
+                              });
 });
 
 /* Post handler for the /review/ page to enable form submission 
   Inserts a review into the database, with the information submitted in the form
 */
 app.post("/review/", async (req, res) => {
+  console.log("HI")
   try {
     const db = await Connection.open(mongoUri, DBNAME);
     //getting relevant variables
@@ -275,7 +293,7 @@ app.post("/review/", async (req, res) => {
     insertReview(db, course_id, difficulty, workload, text, userId, rating, accessibility);
     //flashing verification that the review is submitted, and redirecting to the home page
     req.flash("info", "You have successfully submitted a review!");
-    return res.redirect('/');
+    return res.redirect('/course/'+course_id);
   } catch (error) {
     //error handler, redirects to home page
     req.flash('error', `Form submission error: ${error}`);
@@ -306,7 +324,9 @@ app.get('/inputCourse/', requiresLogin, async (req, res) => {
   const db = await Connection.open(mongoUri, DBNAME);
   //finds departments to put in the ejs form when rendering
   var departments = await db.collection("departments").find({}).toArray();
-  res.render('makeCourse.ejs', {departments: departments});
+  
+  const loggedIn = (req.session.loggedIn) || false;
+  res.render('makeCourse.ejs', {departments: departments, loggedIn: loggedIn});
 });
 
 /* POST handler for /inputCourse/
@@ -375,7 +395,11 @@ app.get('/search/', async (req, res) => {
     let searchStrings = [];
     searchResults.forEach(((elt) => searchStrings.push(searchLinkGenerator(elt))));
     console.log(searchStrings);
-    return res.render("searchResult.ejs", {searchResults: searchStrings, formData: formData})
+    loggedIn = (req.session.loggedIn) || false;
+
+    return res.render("searchResult.ejs", {searchResults: searchStrings, 
+                                          loggedIn: loggedIn,
+                                          formData: formData})
   }
 })
 /**
@@ -439,7 +463,7 @@ app.get('/form/', requiresLogin, (req, res) => {
     }
     console.log("hi");
     // End of AMY TEST
-    loggedIn = (req.session.loggedIn)||false;
+    loggedIn = (req.session.loggedIn) || false;
     return res.render('form.ejs', {action: '/form/', data: req.query, loggedIn: loggedIn });
 });
 
