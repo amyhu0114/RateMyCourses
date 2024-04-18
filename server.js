@@ -58,7 +58,7 @@ const ROUNDS = 15;
 // ================================================================
 // custom routes here
 
-const DB = process.env.USER;
+const DTB = 'RateMyCourse';
 const WMDB = 'wmdb';
 const STAFF = 'staff';
 
@@ -73,10 +73,34 @@ app.get('/', (req, res) => {
     return res.render('main.ejs', {loggedIn: loggedIn});
 });
 
-const DTB = 'RateMyCourse';
 
+/**
+ * Calculates the given number out of a 5-point scale represented with star symbols.
+ * @param {number} starNum 
+ * @returns {string} star representation of given number
+ */
 function makeStars(starNum) {
   return '★'.repeat(starNum) + '☆'.repeat(5-starNum);
+}
+
+function formatReveiws(reviewData) {
+  // Get relevant review data
+  const reviewList = reviewData.map((reviewObj) => {
+    // Must parseInt since data wasn't consistently integers for a while
+    const workloadNum = parseInt(reviewObj.workloadRating);
+    const accessibilityNum = parseInt(reviewObj.accessibilityRating);
+    const contentNum = parseInt(reviewObj.contentDifficulty);
+    const overallNum = parseInt(reviewObj.overallRating);
+
+    return {workloadStars: makeStars(workloadNum),
+            accessibilityStars: makeStars(accessibilityNum),
+            contentStars: makeStars(contentNum),
+            overallStars:makeStars(overallNum),
+            text: reviewObj.reviewText,
+            }
+  });
+
+  return reviewList;
 }
 
 app.get('/course/:cid', async (req, res) => {
@@ -103,20 +127,7 @@ app.get('/course/:cid', async (req, res) => {
   // Get review data
   const reviewData = await db.collection('reviews').find({courseId: parseInt(cid)}).toArray();
 
-  const reviewList = reviewData.map((reviewObj) => {
-    // Must parseInt since data wasn't consistently integers for a while
-    const workloadNum = parseInt(reviewObj.workloadRating);
-    const accessibilityNum = parseInt(reviewObj.accessibilityRating);
-    const contentNum = parseInt(reviewObj.contentDifficulty);
-    const overallNum = parseInt(reviewObj.overallRating);
-
-    return {workloadStars: makeStars(workloadNum),
-            accessibilityStars: makeStars(accessibilityNum),
-            contentStars: makeStars(contentNum),
-            overallStars:makeStars(overallNum),
-            text: reviewObj.reviewText,
-            }
-  })
+  
 
   // Get session data
   const loggedIn = (req.session.loggedIn) || false;
