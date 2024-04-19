@@ -18,13 +18,18 @@
       method="POST"
       action="/review/">
      <label>Course: </label> 
-     <select name="courseId">
+     <select name="courseIdReview">
       <option value="" disabled selected>Choose one</option>
       <!-- making an option for each course in the list-->
       <% courses.forEach( course => {%>
           <option value = "<%=course.courseId%>" > <%=course.courseCode%>: <%=course.courseName%> </option>
       <% }) %>
     </select><br><br>
+    <div id = "professorSel" /*style = "display: none"*/>
+        <label>Professor: </label>
+        <select name ="Professor">
+        </select><br><br>
+    </div>
     <p>Workload Rating: 
     <label>1<input type="radio" name = "workloadRating"  value = 1></label>
     <label>2<input type="radio" name = "workloadRating" value = 2></label>
@@ -65,6 +70,22 @@ action="/inputCourse/" >
    <p>Course missing?</p>
    <button type="submit">Add a new Course!</button>
 </form>
+<script>
+    var profs = '<%- JSON.stringify(professors) %>';
+    profs = JSON.parse(profs);
+    function loadProfessors(){
+        var selectedID = $('[name="courseIdReview"]').find(':selected').val();
+        console.log(selectedID)
+        console.log(profs[selectedID])
+        console.log(profs[selectedID.toString()])
+        $('[name=Professor]').append(profs[selectedID].map(
+            professorName => `<option value = ${professorName}> ${professorName} </option>`
+            )
+        )
+    }
+    $('[name="courseIdReview"]').change(loadProfessors)
+
+</script>
 
     <!-- load local js -->
     <script src="/main.js"></script>

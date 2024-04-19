@@ -254,7 +254,10 @@ app.get('/review/', requiresLogin, async (req, res) => {
   const db = await Connection.open(mongoUri, DBNAME);
   //finds courses to feed into rendering of makeReview.ejs page
   var courses = await db.collection("courses").find({}).toArray();
-  res.render('makeReview.ejs', {courses: courses});
+  var professors = {};
+  courses.forEach(course => professors[course.courseId]=course.professorNames)
+  console.log(professors);
+  res.render('makeReview.ejs', {courses: courses, professors:professors});
 });
 
 /* Post handler for the /review/ page to enable form submission 
@@ -264,7 +267,7 @@ app.post("/review/", async (req, res) => {
   try {
     const db = await Connection.open(mongoUri, DBNAME);
     //getting relevant variables
-    var course_id = req.body.courseId;
+    var course_id = req.body.courseIdReview;
     var difficulty = req.body.contentDifficulty;
     var accessibility = req.body.accessibility;
     var rating = req.body.rating;
