@@ -149,9 +149,7 @@ app.get('/course/:cid', async (req, res) => {
 
 })
 
-app.get("/profile/", async (req, res) => {
-  return res.render("profile.ejs");
-})
+
 
 
 // ===============Beginning of Amy Work ============================
@@ -258,6 +256,19 @@ app.post("/join", async (req, res) => {
         next();
     }
   }
+
+  app.get("/profile", async (req, res) => {
+    // Get review data given the logged in user from the database
+    var userId = req.session.userId;
+    var username = req.session.username;
+    const db = await Connection.open(mongoUri, DTB);
+    const reviewData = await db.collection('reviews').find({userId: parseInt(userId)}).toArray();
+    const reviewList = formatReveiws(reviewData);
+    
+    // Get session data
+    const loggedIn = (req.session.loggedIn) || false;
+    return res.render("profile.ejs", {userName: username, reviewList: reviewList, loggedIn: loggedIn});
+  })
 // ===============End of Amy Work ==================================
 
 // ===============Beginning of Nya Work ============================
@@ -303,7 +314,7 @@ app.post("/review/", async (req, res) => {
     var rating = req.body.rating;
     var workload = req.body.workloadRating;
     var text = req.body.reviewText;
-    var userId = req.session.userId
+    var userId = req.session.userId;
     //inserting the review
     insertReview(db, course_id, difficulty, workload, text, userId, rating, accessibility);
     //flashing verification that the review is submitted, and redirecting to the home page

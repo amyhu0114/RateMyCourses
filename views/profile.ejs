@@ -10,8 +10,24 @@
 </head>
 <body>
     <%- include("partials/navbar.ejs", {loggedIn: loggedIn}) %>
-    <p>Profile, coming soon!</p>
-
+    <h1>Welcome, <%=userName%>!</p>
+    <h2>Reviews Made</h2>
+    <div>
+        <% reviewList.forEach((rev) => {  %>
+            <div class="courseCard">
+                <p><%= rev.courseId%></p>
+                <p class="reviewTitle">Review Title!</p>
+                <p><%= rev.text %></p>
+                <div class="container">
+                    <p><%= rev.overallStars %> OVERALL</p>
+                    <p><%= rev.workloadStars %> Workload</p>
+                    <p><%= rev.accessibilityStars %> Accessibility</p>
+                    <p><%= rev.contentStars %> Content Difficulty</p>
+                </div>
+                
+            </div>
+        <% }); %>
+    </div>
   
 </body>
 </html>
