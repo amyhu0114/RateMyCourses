@@ -429,6 +429,13 @@ function searchLinkGenerator(searchResult) {
   return [`/course/${courseID}`, `${className}`]
 }
 
+
+//new route to "browse all courses" page
+app.get('/browse/', async (req, res) => {
+  return res.render("searchbrowser.ejs");
+})
+
+
 //================End of Nico Work =================================
 
 // ===============Given Code Below (Don't Delete yet)===============
