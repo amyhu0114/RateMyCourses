@@ -88,23 +88,29 @@ function makeStars(starNum) {
  * @param {Array} reviewData 
  * @returns {Array}
  */
-function formatReveiws(reviewData) {
+async function formatReveiws(reviewData) {
   // Get relevant review data
-  const reviewList = reviewData.map((reviewObj) => {
+  const reviewList = await Promise.all(reviewData.map(async (reviewObj) => {
     // Must parseInt since data wasn't consistently integers for a while
     const workloadNum = parseInt(reviewObj.workloadRating);
     const accessibilityNum = parseInt(reviewObj.accessibilityRating);
     const contentNum = parseInt(reviewObj.contentDifficulty);
     const overallNum = parseInt(reviewObj.overallRating);
+    const cid = parseInt(reviewObj.courseId);
+    const db = await Connection.open(mongoUri, DTB);
+
+    // Get course data
+    const courseList = await db.collection('courses').find({courseId: parseInt(cid)}).toArray();
+    const courseName = courseList[0].courseName;
 
     return {workloadStars: makeStars(workloadNum),
             accessibilityStars: makeStars(accessibilityNum),
             contentStars: makeStars(contentNum),
             overallStars:makeStars(overallNum),
             text: reviewObj.reviewText,
+            courseName: courseName,
             }
-  });
-
+  }));
   return reviewList;
 }
 
@@ -131,7 +137,7 @@ app.get('/course/:cid', async (req, res) => {
 
   // Get review data
   const reviewData = await db.collection('reviews').find({courseId: parseInt(cid)}).toArray();
-  const reviewList = formatReveiws(reviewData);
+  const reviewList = await formatReveiws(reviewData);
 
   // Get session data
   const loggedIn = (req.session.loggedIn) || false;
@@ -263,7 +269,7 @@ app.post("/join", async (req, res) => {
     var username = req.session.username;
     const db = await Connection.open(mongoUri, DTB);
     const reviewData = await db.collection('reviews').find({userId: parseInt(userId)}).toArray();
-    const reviewList = formatReveiws(reviewData);
+    const reviewList = await formatReveiws(reviewData);
     
     // Get session data
     const loggedIn = (req.session.loggedIn) || false;
