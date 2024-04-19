@@ -398,6 +398,7 @@ app.post("/inputCourse/", async (req, res) => {
 app.get('/search/', async (req, res) => {
   let formData = req.query.term;
   console.log(`you submitted ${formData} to the search`)
+  
 
   //create Regular expression to search
   let customRegex = new RegExp(formData, 'i');
@@ -407,6 +408,8 @@ app.get('/search/', async (req, res) => {
   const db = await Connection.open(mongoUri, DBNAME);
   const classDB = db.collection("classes");
   console.log("successfully connected to database")
+  let listOfDepts = await db.collection("departments").find().toArray();
+  console.log("Depts list: ", listOfDepts);
   
   //search database for term
   let searchResults = await db.collection("courses").find({courseCode: {$regex: customRegex}}).project({_id: 0, courseCode: 1, courseId: 1}).toArray();
@@ -427,11 +430,12 @@ app.get('/search/', async (req, res) => {
     let searchStrings = [];
     searchResults.forEach(((elt) => searchStrings.push(searchLinkGenerator(elt))));
     console.log(searchStrings);
+    
     loggedIn = (req.session.loggedIn) || false;
 
     return res.render("searchResult.ejs", {searchResults: searchStrings, 
                                           loggedIn: loggedIn,
-                                          formData: formData})
+                                          formData: formData, depts: listOfDepts})
   }
 })
 /**
@@ -449,6 +453,45 @@ function searchLinkGenerator(searchResult) {
 
 //new route to "browse all courses" page
 app.get('/browse/', async (req, res) => {
+  let queryDept = req.query.department;
+  console.log(req.body);
+  console.log(`you submitted ${queryDept} to the search`)
+  
+  //open database connection
+  const db = await Connection.open(mongoUri, DBNAME);
+  const classDB = db.collection("classes");
+  console.log("successfully connected to database")
+  let blank = "";
+
+  let deptIdInt = parseInt(queryDept)
+  //now, search courses for department ID
+
+  const loggedIn = (req.session.loggedIn) || false;
+
+  let searchResults = await db.collection("courses").find({departmentId: deptIdInt}).toArray();
+
+  let listOfDepts = await db.collection("departments").find().toArray();
+  //now we have our list of search results
+  
+  //handle no search results
+  if(searchResults.length <1){
+    console.log("no results identified");
+    req.flash('error', 'Sorry, there are no courses currently listed in this department.');
+    //console.log("flashed");
+    return res.redirect("/search/");
+  }
+
+  //handle one to multiple results
+  else if(searchResults.length >= 1){
+    console.log("Search results identified");
+    let searchStrings = [];
+    searchResults.forEach(((elt) => searchStrings.push(searchLinkGenerator(elt))));
+    console.log(searchStrings);
+
+    return res.render("searchResult.ejs", {searchResults: searchStrings, 
+                                          loggedIn: loggedIn,
+                                          formData: blank, depts: listOfDepts})
+  }
   return res.render("searchbrowser.ejs");
 })
 
