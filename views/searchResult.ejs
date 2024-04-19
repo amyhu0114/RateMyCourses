@@ -23,6 +23,20 @@
         </p>
     </form>
 
+    <form id = "filterForm" method = "GET" action = "/browse/">
+        <p>
+            <label>
+                Filter by department:
+            </label>
+            <select type = "dropdown" id = "filterDropdown" required name = "department">
+                <option>Choose a Department...</option>
+                <% depts.forEach((elt) => {%> 
+                <option value  = <%= elt.departmentId %>><%= elt.departmentName %></option> <% }); %>
+            </select>
+            <input type = "submit" value = "filter" id="searchbutton">
+        </p>
+    </form>
+
     <h1>Search Results:</h1>
     <p>You searched for: "<%= formData %>"</p>
 

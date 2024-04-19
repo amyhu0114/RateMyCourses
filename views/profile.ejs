@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Node Starter</title>
+    <!-- load local stylesheet (css) -->
+    <link rel="stylesheet" href="/styles.css" />
+    <!-- loading jquery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    <%- include("partials/navbar.ejs", {loggedIn: loggedIn}) %>
+    <h1>Welcome, <%=userName%>!</p>
+    <h2>Reviews Made</h2>
+    <div>
+        <% reviewList.forEach((rev) => {  %>
+            <div class="courseCard">
+                <p><%= rev.courseName%></p>
+                <p class="reviewTitle">Review Title!</p>
+                <p><%= rev.text %></p>
+                <div class="container">
+                    <p><%= rev.overallStars %> OVERALL</p>
+                    <p><%= rev.workloadStars %> Workload</p>
+                    <p><%= rev.accessibilityStars %> Accessibility</p>
+                    <p><%= rev.contentStars %> Content Difficulty</p>
+                </div>
+                
+            </div>
+        <% }); %>
+    </div>
+  
+</body>
+</html>

@@ -58,7 +58,7 @@ const ROUNDS = 15;
 // ================================================================
 // custom routes here
 
-const DB = process.env.USER;
+const DTB = 'RateMyCourse';
 const WMDB = 'wmdb';
 const STAFF = 'staff';
 
@@ -73,55 +73,88 @@ app.get('/', (req, res) => {
     return res.render('main.ejs', {loggedIn: loggedIn});
 });
 
-const DTB = 'RateMyCourse';
+
+/**
+ * Calculates the given number out of a 5-point scale represented with star symbols.
+ * @param {number} starNum 
+ * @returns {string} star representation of given number
+ */
+function makeStars(starNum) {
+  return '★'.repeat(starNum) + '☆'.repeat(5-starNum);
+}
+
+/**
+ * Takes review data from database, formats relevant data.
+ * @param {Array} reviewData 
+ * @returns {Array}
+ */
+async function formatReveiws(reviewData) {
+  // Get relevant review data
+  const reviewList = await Promise.all(reviewData.map(async (reviewObj) => {
+    // Must parseInt since data wasn't consistently integers for a while
+    const workloadNum = parseInt(reviewObj.workloadRating);
+    const accessibilityNum = parseInt(reviewObj.accessibilityRating);
+    const contentNum = parseInt(reviewObj.contentDifficulty);
+    const overallNum = parseInt(reviewObj.overallRating);
+    const cid = parseInt(reviewObj.courseId);
+    const db = await Connection.open(mongoUri, DTB);
+
+    // Get course data
+    const courseList = await db.collection('courses').find({courseId: parseInt(cid)}).toArray();
+    const courseName = courseList[0].courseName;
+
+    return {workloadStars: makeStars(workloadNum),
+            accessibilityStars: makeStars(accessibilityNum),
+            contentStars: makeStars(contentNum),
+            overallStars:makeStars(overallNum),
+            text: reviewObj.reviewText,
+            courseName: courseName,
+            }
+  }));
+  return reviewList;
+}
+
 app.get('/course/:cid', async (req, res) => {
-  // TO DO: make course star calc functions
-  // Standardize review dtb, add review text, poster, date, title?
-  // Make course look nice
- 
+  // Set relevant variables
   const cid = req.params.cid;
   const db = await Connection.open(mongoUri, DTB);
 
   // Get course data
   const courseList = await db.collection('courses').find({courseId: parseInt(cid)}).toArray();
-  // if (courseList.length === 0) {
-  //   return; //ELEPHANT
-  // }
+  if (courseList.length === 0) {
+    req.flash('error', `Course with courseId ${cid} not found!`);
+    return res.redirect("/");
+  }
   const courseData = courseList[0]
-  // console.log("courseData", courseData)
 
-
-  // Get department name
+  // Get department data
   const deptList = await db.collection('departments').find({departmentId: courseData.departmentId}).toArray();
-
-  // if (deptList.length === 0) {
-  //   return; //ELEPHANT
-  // }
+  if (deptList.length === 0) {
+    req.flash('error', `Department with departmentId ${courseData.departmentId} not found!`);
+    return res.redirect("/");
+  }
   const departmentName = deptList[0].departmentName;
 
+  // Get review data
   const reviewData = await db.collection('reviews').find({courseId: parseInt(cid)}).toArray();
-  console.log(reviewData)
-  const reviewList = reviewData.map((reviewObj) => {
-    const workloadNum = parseInt(reviewObj.workloadRating);
-    const accessibilityNum = parseInt(reviewObj.contentDifficulty);
-    const contentNum = parseInt(reviewObj.accessibility);
+  const reviewList = await formatReveiws(reviewData);
 
-    return {workloadStars: '★'.repeat(workloadNum) + '☆'.repeat(5-workloadNum),
-            accessibilityStars: '★'.repeat(accessibilityNum) + '☆'.repeat(5-accessibilityNum),
-            contentStars: '★'.repeat(contentNum) + '☆'.repeat(5-contentNum),
-            }
-  })
+  // Get session data
+  const loggedIn = (req.session.loggedIn) || false;
 
-  console.log(reviewList)
+  // TO DO IN ALPHA: implement summing for course ratings from avg of reviews
   return res.render("course.ejs", {courseHeader: `${courseData.courseCode}: ${courseData.courseName}`,
                                   courseSubheader: `${departmentName} - Taught By: ${courseData.professorNames.join(", ")}`,
-                                  accessibilityStars: 5,
-                                  workloadStars: 2, 
-                                  contentStars: 4,
-                                  reviewList: reviewList
+                                  overallStars: makeStars(4),
+                                  accessibilityStars: makeStars(5),
+                                  workloadStars: makeStars(2), 
+                                  contentStars: makeStars(4),
+                                  reviewList: reviewList,
+                                  loggedIn: loggedIn
                                 })
 
 })
+
 
 
 
@@ -229,6 +262,19 @@ app.post("/join", async (req, res) => {
         next();
     }
   }
+
+  app.get("/profile", async (req, res) => {
+    // Get review data given the logged in user from the database
+    var userId = req.session.userId;
+    var username = req.session.username;
+    const db = await Connection.open(mongoUri, DTB);
+    const reviewData = await db.collection('reviews').find({userId: parseInt(userId)}).toArray();
+    const reviewList = await formatReveiws(reviewData);
+    
+    // Get session data
+    const loggedIn = (req.session.loggedIn) || false;
+    return res.render("profile.ejs", {userName: username, reviewList: reviewList, loggedIn: loggedIn});
+  })
 // ===============End of Amy Work ==================================
 
 // ===============Beginning of Nya Work ============================
@@ -257,13 +303,17 @@ app.get('/review/', requiresLogin, async (req, res) => {
   var professors = {};
   courses.forEach(course => professors[course.courseId]=course.professorNames)
   console.log(professors);
-  res.render('makeReview.ejs', {courses: courses, professors:professors});
+  const loggedIn = (req.session.loggedIn) || false;
+  res.render('makeReview.ejs', {courses: courses, professors:professors,
+                                loggedIn: loggedIn
+                              });
 });
 
 /* Post handler for the /review/ page to enable form submission 
   Inserts a review into the database, with the information submitted in the form
 */
 app.post("/review/", async (req, res) => {
+  console.log("HI")
   try {
     const db = await Connection.open(mongoUri, DBNAME);
     //getting relevant variables
@@ -273,12 +323,12 @@ app.post("/review/", async (req, res) => {
     var rating = req.body.rating;
     var workload = req.body.workloadRating;
     var text = req.body.reviewText;
-    var userId = req.session.userId
+    var userId = req.session.userId;
     //inserting the review
     insertReview(db, course_id, difficulty, workload, text, userId, rating, accessibility);
     //flashing verification that the review is submitted, and redirecting to the home page
     req.flash("info", "You have successfully submitted a review!");
-    return res.redirect('/');
+    return res.redirect('/course/'+course_id);
   } catch (error) {
     //error handler, redirects to home page
     req.flash('error', `Form submission error: ${error}`);
@@ -309,7 +359,9 @@ app.get('/inputCourse/', requiresLogin, async (req, res) => {
   const db = await Connection.open(mongoUri, DBNAME);
   //finds departments to put in the ejs form when rendering
   var departments = await db.collection("departments").find({}).toArray();
-  res.render('makeCourse.ejs', {departments: departments});
+  
+  const loggedIn = (req.session.loggedIn) || false;
+  res.render('makeCourse.ejs', {departments: departments, loggedIn: loggedIn});
 });
 
 /* POST handler for /inputCourse/
@@ -340,9 +392,16 @@ app.post("/inputCourse/", async (req, res) => {
 
 //================Start of Nico Work ===============================
 
+/**
+ * Route to find search results when a search term is submitted on the home page. 
+ * Opens a database connection, queries for search term, and then responds appropriately.
+ * If search results are identified, the route will render the search page, if no search results are detected,
+ * it will redirect to the homepage and flash an error. 
+ */
 app.get('/search/', async (req, res) => {
   let formData = req.query.term;
   console.log(`you submitted ${formData} to the search`)
+  
 
   //create Regular expression to search
   let customRegex = new RegExp(formData, 'i');
@@ -352,6 +411,8 @@ app.get('/search/', async (req, res) => {
   const db = await Connection.open(mongoUri, DBNAME);
   const classDB = db.collection("classes");
   console.log("successfully connected to database")
+  let listOfDepts = await db.collection("departments").find().toArray();
+  console.log("Depts list: ", listOfDepts);
   
   //search database for term
   let searchResults = await db.collection("courses").find({courseCode: {$regex: customRegex}}).project({_id: 0, courseCode: 1, courseId: 1}).toArray();
@@ -372,7 +433,12 @@ app.get('/search/', async (req, res) => {
     let searchStrings = [];
     searchResults.forEach(((elt) => searchStrings.push(searchLinkGenerator(elt))));
     console.log(searchStrings);
-    return res.render("searchResult.ejs", {searchResults: searchStrings, formData: formData})
+    
+    loggedIn = (req.session.loggedIn) || false;
+
+    return res.render("searchResult.ejs", {searchResults: searchStrings, 
+                                          loggedIn: loggedIn,
+                                          formData: formData, depts: listOfDepts})
   }
 })
 /**
@@ -386,6 +452,52 @@ function searchLinkGenerator(searchResult) {
   console.log(`/course/${courseID}`, `${className}`);
   return [`/course/${courseID}`, `${className}`]
 }
+
+
+//new route to "browse all courses" page
+app.get('/browse/', async (req, res) => {
+  let queryDept = req.query.department;
+  console.log(req.body);
+  console.log(`you submitted ${queryDept} to the search`)
+  
+  //open database connection
+  const db = await Connection.open(mongoUri, DBNAME);
+  const classDB = db.collection("classes");
+  console.log("successfully connected to database")
+  let blank = "";
+
+  let deptIdInt = parseInt(queryDept)
+  //now, search courses for department ID
+
+  const loggedIn = (req.session.loggedIn) || false;
+
+  let searchResults = await db.collection("courses").find({departmentId: deptIdInt}).toArray();
+
+  let listOfDepts = await db.collection("departments").find().toArray();
+  //now we have our list of search results
+  
+  //handle no search results
+  if(searchResults.length <1){
+    console.log("no results identified");
+    req.flash('error', 'Sorry, there are no courses currently listed in this department.');
+    //console.log("flashed");
+    return res.redirect("/search/");
+  }
+
+  //handle one to multiple results
+  else if(searchResults.length >= 1){
+    console.log("Search results identified");
+    let searchStrings = [];
+    searchResults.forEach(((elt) => searchStrings.push(searchLinkGenerator(elt))));
+    console.log(searchStrings);
+
+    return res.render("searchResult.ejs", {searchResults: searchStrings, 
+                                          loggedIn: loggedIn,
+                                          formData: blank, depts: listOfDepts})
+  }
+  return res.render("searchbrowser.ejs");
+})
+
 
 //================End of Nico Work =================================
 
@@ -436,7 +548,7 @@ app.get('/form/', requiresLogin, (req, res) => {
     }
     console.log("hi");
     // End of AMY TEST
-    loggedIn = (req.session.loggedIn)||false;
+    loggedIn = (req.session.loggedIn) || false;
     return res.render('form.ejs', {action: '/form/', data: req.query, loggedIn: loggedIn });
 });
 

@@ -10,21 +10,32 @@
 </head>
 <body>
     <%- include("partials/navbar.ejs", {loggedIn: loggedIn}) %>
+    <%- include("partials/flashes.ejs") %>
 
     <div>
         <h1><%= courseHeader %></h1>
         <p><%= courseSubheader %></p>
-        <p><%= accessibilityStars %> Accessibility</p>
-        <p><%= workloadStars %> Workload</p>
-        <p><%= contentStars %> Content Difficulty</p>
+        <div class="container">
+            <p><%= overallStars %> OVERALL</p>
+            <p><%= workloadStars %> Workload</p>
+            <p><%= accessibilityStars %> Accessibility</p>
+            <p><%= contentStars %> Content Difficulty</p>
+        </div>
     </div>
+    <br>
 
     <div>
         <% reviewList.forEach((rev) => {  %>
             <div class="courseCard">
-                <p><%= rev.workloadStars %> Workload</p>
-                <p><%= rev.accessibilityStars %> Accessibility</p>
-                <p><%= rev.contentStars %> Content Difficulty</p>
+                <p class="reviewTitle">Review Title!</p>
+                <p><%= rev.text %></p>
+                <div class="container">
+                    <p><%= rev.overallStars %> OVERALL</p>
+                    <p><%= rev.workloadStars %> Workload</p>
+                    <p><%= rev.accessibilityStars %> Accessibility</p>
+                    <p><%= rev.contentStars %> Content Difficulty</p>
+                </div>
+                
             </div>
         <% }); %>
     </div>
