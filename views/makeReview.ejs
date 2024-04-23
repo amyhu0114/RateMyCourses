@@ -75,9 +75,12 @@ action="/inputCourse/" >
     profs = JSON.parse(profs);
     function loadProfessors(){
         var selectedID = $('[name="courseIdReview"]').find(':selected').val();
+        $('[name="Professor"]').empty()
+        /*
         console.log(selectedID)
         console.log(profs[selectedID])
         console.log(profs[selectedID.toString()])
+        */
         $('[name=Professor]').append(profs[selectedID].map(
             professorName => `<option> ${professorName} </option>`
             )
