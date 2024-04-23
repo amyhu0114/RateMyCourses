@@ -79,7 +79,7 @@ action="/inputCourse/" >
         console.log(profs[selectedID])
         console.log(profs[selectedID.toString()])
         $('[name=Professor]').append(profs[selectedID].map(
-            professorName => `<option value = ${professorName}> ${professorName} </option>`
+            professorName => `<option> ${professorName} </option>`
             )
         )
     }
