@@ -109,6 +109,8 @@ async function formatReveiws(reviewData) {
             overallStars:makeStars(overallNum),
             text: reviewObj.reviewText,
             courseName: courseName,
+            upvotes: reviewObj.upvotes,
+            downvotes: reviewObj.downvotes,
             }
   }));
   return reviewList;
@@ -292,8 +294,8 @@ app.post("/join", async (req, res) => {
   returns a promise to update the database
   Helper function for the Post handler of the /review/ page
 */
-function insertReview(db, courseId, difficulty, workload, text, userId, rating, accessibility){
-  let result = db.collection("reviews").insertOne({courseId: parseInt(courseId), contentDifficulty: parseInt(difficulty), workloadRating: parseInt(workload), reviewText: text, userId: parseInt(userId), overallRating: parseInt(rating), accessibilityRating: parseInt(accessibility)});
+function insertReview(db, courseId, difficulty, workload, text, userId, rating, accessibility, professor){
+  let result = db.collection("reviews").insertOne({courseId: parseInt(courseId), contentDifficulty: parseInt(difficulty), workloadRating: parseInt(workload), reviewText: text, userId: parseInt(userId), overallRating: parseInt(rating), accessibilityRating: parseInt(accessibility), professor: professor});
   return result;
 }
 
@@ -333,8 +335,16 @@ app.post("/review/", async (req, res) => {
     var workload = req.body.workloadRating;
     var text = req.body.reviewText;
     var userId = req.session.userId;
+    var professor = req.body.Professor;
+    if (professor == 'other'){
+      var newProf = req.body.newProf;
+      insertReview(db, course_id, difficulty, workload, text, userId, rating, accessibility, newProf);
+      //do something to add to course
+    }
+    else{
     //inserting the review
-    insertReview(db, course_id, difficulty, workload, text, userId, rating, accessibility);
+    insertReview(db, course_id, difficulty, workload, text, userId, rating, accessibility, professor);
+    }
     //flashing verification that the review is submitted, and redirecting to the home page
     req.flash("info", "You have successfully submitted a review!");
     return res.redirect('/course/'+course_id);
