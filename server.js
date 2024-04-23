@@ -325,8 +325,15 @@ app.post("/review/", async (req, res) => {
     var text = req.body.reviewText;
     var userId = req.session.userId;
     var professor = req.body.Professor;
+    if (professor == 'other'){
+      var newProf = req.body.newProf;
+      insertReview(db, course_id, difficulty, workload, text, userId, rating, accessibility, newProf);
+      //do something to add to course
+    }
+    else{
     //inserting the review
     insertReview(db, course_id, difficulty, workload, text, userId, rating, accessibility, professor);
+    }
     //flashing verification that the review is submitted, and redirecting to the home page
     req.flash("info", "You have successfully submitted a review!");
     return res.redirect('/course/'+course_id);

@@ -85,8 +85,20 @@ action="/inputCourse/" >
             professorName => `<option> ${professorName} </option>`
             )
         )
+        $('[name="Professor"]').append(
+            "<option id = 'other' value = 'other'>other</option>"
+        )
+    }
+    function loadInputText(){
+        console.log("loading input text")
+        if ($(this).val() === 'other'){
+            $('#professorSel').append(
+                "<label>New Professor <input type = textarea name = 'newProf'></input></label> "
+            )
+        }
     }
     $('[name="courseIdReview"]').change(loadProfessors)
+    $('[name="Professor"]').change(loadInputText)
 
 </script>
 
