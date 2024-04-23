@@ -109,6 +109,8 @@ async function formatReveiws(reviewData) {
             overallStars:makeStars(overallNum),
             text: reviewObj.reviewText,
             courseName: courseName,
+            upvotes: reviewObj.upvotes,
+            downvotes: reviewObj.downvotes,
             }
   }));
   return reviewList;
