@@ -102,6 +102,8 @@ function formatReveiws(reviewData) {
             contentStars: makeStars(contentNum),
             overallStars:makeStars(overallNum),
             text: reviewObj.reviewText,
+            upvotes: reviewObj.upvotes,
+            downvotes: reviewObj.downvotes,
             }
   });
 
