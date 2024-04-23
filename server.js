@@ -275,6 +275,15 @@ app.post("/join", async (req, res) => {
     const loggedIn = (req.session.loggedIn) || false;
     return res.render("profile.ejs", {userName: username, reviewList: reviewList, loggedIn: loggedIn});
   })
+
+  app.post('/remove-review/', async (req, res) => {
+        //console.log(Object.keys(req.body));
+        console.log(req.body.cN);
+        let cN = req.body.cN;
+        const db = await Connection.open(mongoUri, DTB);
+        let result = db.collection("reviews").deleteOne({courseName:cN});
+        
+    });
 // ===============End of Amy Work ==================================
 
 // ===============Beginning of Nya Work ============================
