@@ -35,3 +35,12 @@ $("#login-ajax").click(loginAjax);
 
 console.log('main.js loaded');
 
+/*
+function loadProfessors(){
+    $.get("/test/"+123, {}).then(processAction)
+
+
+}
+
+$('[name="courseIdReview"]').change(loadProfessors)
+*/
