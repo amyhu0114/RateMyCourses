@@ -278,13 +278,14 @@ app.post("/join", async (req, res) => {
     return res.render("profile.ejs", {userName: username, reviewList: reviewList, loggedIn: loggedIn});
   })
 
-  app.post('/remove-review/', async (req, res) => {
+  app.post('/remove-review/',requiresLogin, async (req, res) => {
         //console.log(Object.keys(req.body));
         console.log(req.body.cN);
         let cN = req.body.cN;
         const db = await Connection.open(mongoUri, DTB);
-        let result = db.collection("reviews").deleteOne({courseName:cN});
-        
+        var userId = req.session.userId;
+        //let result = await db.collection("reviews").deleteOne({courseName:cN, userId: userId});
+        //console.log(result);
     });
 // ===============End of Amy Work ==================================
 
