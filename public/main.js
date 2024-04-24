@@ -55,6 +55,17 @@ $("#allReviews")
             $(cC).remove();
         });
 
+
+function incVotes(upInc, downInc){
+    $.post('/increment-votes/', {upInc: upInc, downInc: downInc});
+}
+
+$("#courseCard").some().on('click', 'button[data-role=voteBtn]', (event) => {
+    const totalVotesP = $(event.target).closest('p');
+    let totalNum = totalVotesP.text();
+    console.log(totalNum)
+})
+
 console.log('main.js loaded');
 
 /*
@@ -66,3 +77,4 @@ function loadProfessors(){
 
 $('[name="courseIdReview"]').change(loadProfessors)
 */
+
