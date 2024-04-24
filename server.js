@@ -112,6 +112,7 @@ async function formatReveiws(reviewData) {
             courseName: courseName,
             upvotes: reviewObj.upvotes,
             downvotes: reviewObj.downvotes,
+            id: reviewObj.reviewId,
             }
   }));
   return reviewList;
@@ -158,7 +159,15 @@ app.get('/course/:cid', async (req, res) => {
 
 })
 
+app.post('/increment-votes/', async (req, res) => {
+  console.log(req.body.cN);
+  const upInc = req.body.upInc;
+  const downInc = req.body.downInc;
 
+  const db = await Connection.open(mongoUri, DTB);
+  let result = db.collection("reviews").updateOne({courseName:cN});
+  
+});
 
 
 // ===============Beginning of Amy Work ============================
@@ -295,8 +304,11 @@ app.post("/join", async (req, res) => {
   returns a promise to update the database
   Helper function for the Post handler of the /review/ page
 */
-function insertReview(db, courseId, difficulty, workload, text, userId, rating, accessibility, professor){
-  let result = db.collection("reviews").insertOne({courseId: parseInt(courseId), contentDifficulty: parseInt(difficulty), workloadRating: parseInt(workload), reviewText: text, userId: parseInt(userId), overallRating: parseInt(rating), accessibilityRating: parseInt(accessibility), professor: professor});
+async function insertReview(db, courseId, difficulty, workload, text, userId, rating, accessibility, professor){
+  const counterCol = await db.collection('counters');
+  const newId = await counter.incrCounter(counterCol, 'reviews');
+  console.log(newId);
+  let result = db.collection("reviews").insertOne({courseId: parseInt(courseId), contentDifficulty: parseInt(difficulty), workloadRating: parseInt(workload), reviewText: text, userId: parseInt(userId), overallRating: parseInt(rating), accessibilityRating: parseInt(accessibility), professor: professor, upvotes: 0, downvotes: 0, reviewId: newId});
   return result;
 }
 
@@ -339,12 +351,12 @@ app.post("/review/", async (req, res) => {
     var professor = req.body.Professor;
     if (professor == 'other'){
       var newProf = req.body.newProf;
-      insertReview(db, course_id, difficulty, workload, text, userId, rating, accessibility, newProf);
+      await insertReview(db, course_id, difficulty, workload, text, userId, rating, accessibility, newProf);
       //do something to add to course
     }
     else{
     //inserting the review
-    insertReview(db, course_id, difficulty, workload, text, userId, rating, accessibility, professor);
+    await insertReview(db, course_id, difficulty, workload, text, userId, rating, accessibility, professor);
     }
     //flashing verification that the review is submitted, and redirecting to the home page
     req.flash("info", "You have successfully submitted a review!");

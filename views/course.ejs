@@ -26,7 +26,7 @@
 
     <div>
         <% reviewList.forEach((rev) => {  %>
-            <div class="courseCard">
+            <div class="courseCard" id=<%= rev.id %>>
                 <p class="reviewTitle">Review Title!</p>
                 <p><%= rev.text %></p>
                 <div class="container">
@@ -35,10 +35,12 @@
                     <p><%= rev.accessibilityStars %> Accessibility</p>
                     <p><%= rev.contentStars %> Content Difficulty</p>
                 </div>
-                <button><%= rev.upvotes %>↑</button>
-                <button><%= rev.downvotes %>↓</button>
+                <button data-role="voteBtn" onclick=""><%= rev.upvotes %>↑</button>
+                <p><%= rev.upvotes - rev.downvotes%></p>
+                <button data-role="voteBtn"><%= rev.downvotes %>↓</button>
             </div>
         <% }); %>
     </div>
 </body>
+<script src="/main.js"></script>
 </html>
