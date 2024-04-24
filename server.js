@@ -103,6 +103,7 @@ async function formatReveiws(reviewData) {
     const courseList = await db.collection('courses').find({courseId: parseInt(cid)}).toArray();
     const courseName = courseList[0].courseName;
 
+
     return {workloadStars: makeStars(workloadNum),
             accessibilityStars: makeStars(accessibilityNum),
             contentStars: makeStars(contentNum),
