@@ -33,8 +33,8 @@ function loginAjax() {
 
 $("#login-ajax").click(loginAjax);
 
-function removeReview(cN){
-    $.post('/remove-review/', {cN: cN});
+function removeReview(cID){
+    $.post('/remove-review/', {cID: cID});
     // console.log(`INSIDE removeReview ${cN}`)
     // const req = new Request('/remove-review-ajax/', {method: 'POST',
     //                                            body: `{"cN": "${cN}"}`}); // body: {"cN": cN}});
@@ -49,9 +49,10 @@ $("#allReviews")
         'button[data-role=deleteReview]',
         function (event) {
             let cC = $(event.target).closest('.courseCard');
-            let cN = $(cC).find('.courseName').text();
-            console.log(`WITHIN HANDLER ${cN}`);
-            removeReview(cN);
+            //let cN = $(cC).find('.courseName').text();
+            let cID = $(cC).attr('id');
+            console.log(`WITHIN HANDLER ${cID}`);
+            removeReview(cID);
             $(cC).remove();
         });
 

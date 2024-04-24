@@ -113,6 +113,7 @@ async function formatReveiws(reviewData) {
             upvotes: reviewObj.upvotes,
             downvotes: reviewObj.downvotes,
             id: reviewObj.reviewId,
+            courseId: parseInt(reviewObj.courseId)
             }
   }));
   return reviewList;
@@ -275,6 +276,7 @@ app.post("/join", async (req, res) => {
     }
   }
 
+  // GET handler that shows all the reviews made by the logged in user
   app.get("/profile", async (req, res) => {
     // Get review data given the logged in user from the database
     var userId = req.session.userId;
@@ -288,14 +290,13 @@ app.post("/join", async (req, res) => {
     return res.render("profile.ejs", {userName: username, reviewList: reviewList, loggedIn: loggedIn});
   })
 
+  // POST handler for user to delete any review they've made
   app.post('/remove-review/',requiresLogin, async (req, res) => {
-        //console.log(Object.keys(req.body));
-        console.log(req.body.cN);
-        let cN = req.body.cN;
-        const db = await Connection.open(mongoUri, DTB);
+        let cID = parseInt(req.body.cID);
         var userId = req.session.userId;
-        //let result = await db.collection("reviews").deleteOne({courseName:cN, userId: userId});
-        //console.log(result);
+        const db = await Connection.open(mongoUri, DTB);
+        let result = await db.collection("reviews").deleteOne({courseId:cID, userId: userId});
+        console.log(result);
     });
 // ===============End of Amy Work ==================================
 
