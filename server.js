@@ -325,7 +325,9 @@ async function insertReview(db, courseId, difficulty, workload, text, userId, ra
   const counterCol = await db.collection('counters');
   const newId = await counter.incrCounter(counterCol, 'reviews');
   console.log(newId);
-  let result = db.collection("reviews").insertOne({courseId: parseInt(courseId), contentDifficulty: parseInt(difficulty), workloadRating: parseInt(workload), reviewText: text, userId: parseInt(userId), overallRating: parseInt(rating), accessibilityRating: parseInt(accessibility), professor: professor, upvotes: 0, downvotes: 0, reviewId: newId});
+  let result = db.collection("reviews").insertOne({courseId: parseInt(courseId), contentDifficulty: parseInt(difficulty), 
+    workloadRating: parseInt(workload), reviewText: text, userId: parseInt(userId), overallRating: parseInt(rating), 
+    accessibilityRating: parseInt(accessibility), professor: professor, upvotes: 0, downvotes: 0, reviewId: newId});
   return result;
 }
 
@@ -370,7 +372,7 @@ app.post("/review/", async (req, res) => {
     if (professor == 'other' || professor == null){
       var newProf = req.body.newProf;
       await insertReview(db, course_id, difficulty, workload, text, userId, rating, accessibility, newProf);
-      await db.collection("courses").updateOne({courseId: parseInt(course_id)}, {$push: {professor: newProf}});
+      await db.collection("courses").updateOne({courseId: parseInt(course_id)}, {$push: {professorNames: newProf}});
       //do something to add to course
     }
     else{
@@ -392,7 +394,8 @@ app.post("/review/", async (req, res) => {
   returns a promise to update the database
 */
 function insertCourse(db, course_id, course_name, course_code, department_id, professor_list){
-  let result = db.collection("courses").insertOne({courseId: parseInt(course_id), courseName: course_name, courseCode: course_code, departmentId: parseInt(department_id), professorNames: professor_list});
+  let result = db.collection("courses").insertOne({courseId: parseInt(course_id), courseName: course_name, 
+    courseCode: course_code, departmentId: parseInt(department_id), professorNames: professor_list});
   return result;
 }
 

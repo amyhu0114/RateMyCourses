@@ -25,10 +25,10 @@
           <option value = "<%=course.courseId%>" > <%=course.courseCode%>: <%=course.courseName%> </option>
       <% }) %>
     </select><br><br>
-    <div id = "professorSel" /*style = "display: none"*/>
-        <label>Professor: </label>
+        <label>Professor: 
         <select name ="Professor">
-        </select><br><br>
+        </select></label><br><br>
+    <div id = "professorSel" /*style = "display: none"*/>
     </div>
     <p>Workload Rating: 
     <label>1<input type="radio" name = "workloadRating"  value = 1></label>
@@ -59,8 +59,7 @@
     <label>5<input type="radio" name = "rating" value = 5></label>
     </p>
     <br>
-     <p>Review:</p>
-    <textarea rows="5" cols="30" name="reviewText"></textarea>    
+    <label>Review: <textarea rows="5" cols="30" name="reviewText"></textarea></label>   
   <p><button type="submit">Submit</button></p>
 </form>
 <form
@@ -76,6 +75,7 @@ action="/inputCourse/" >
     function loadProfessors(){
         var selectedID = $('[name="courseIdReview"]').find(':selected').val();
         $('[name="Professor"]').empty()
+        $('#professorSel').empty()
         if(profs[selectedID].length==0){
             $('#professorSel').append(
                 "<label>New Professor <input type = textarea name = 'newProf'></input></label> "

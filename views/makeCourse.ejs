@@ -16,18 +16,18 @@
 <form id="inputCourse"
       method="POST"
       action="/inputCourse/">
-     <label>Course ID: </label> 
-     <input placeholder=123" name="courseId"><br><br>
-     <label>Course Name: </label> 
-     <input placeholder="Databases with Web Interfaces" name="courseName"><br><br> 
-     <label>Course Code: </label> 
-     <input placeholder="CS304" name="courseCode" id = "courseCode"><br><br>
-     <label>Department: </label> 
+     <label>Course ID:  
+     <input placeholder=123" name="courseId"></label><br><br>
+     <label>Course Name:  
+     <input placeholder="Databases with Web Interfaces" name="courseName"></label><br><br> 
+     <label>Course Code:  
+     <input placeholder="CS304" name="courseCode" id = "courseCode"></label><br><br>
+     <label>Department:  
      <Select name = department>
         <% departments.forEach( (department) => {%>
             <option value = <%= department.departmentId %>><%= department.departmentName %></option>
         <% }); %>
-     </Select><br><br>
+     </Select></label><br><br>
   <p><button type="submit">Submit</button></p>
 </form>
 <script>
