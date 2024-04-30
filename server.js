@@ -97,6 +97,7 @@ async function formatReveiws(reviewData) {
     const contentNum = parseInt(reviewObj.contentDifficulty);
     const overallNum = parseInt(reviewObj.overallRating);
     const cid = parseInt(reviewObj.courseId);
+    const title = reviewObj.title;
     const db = await Connection.open(mongoUri, DTB);
 
     // Get course data
@@ -113,7 +114,8 @@ async function formatReveiws(reviewData) {
             upvotes: reviewObj.upvotes,
             downvotes: reviewObj.downvotes,
             id: reviewObj.reviewId,
-            courseId: parseInt(reviewObj.courseId)
+            courseId: parseInt(reviewObj.courseId),
+            title: title
             }
   }));
   return reviewList;

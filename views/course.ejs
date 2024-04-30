@@ -27,7 +27,7 @@
     <div>
         <% reviewList.forEach((rev) => {  %>
             <div class="courseCard" id=<%= rev.id %>>
-                <p class="reviewTitle">Review Title!</p>
+                <p class="reviewTitle"><%= rev.title%></p>
                 <p><%= rev.text %></p>
                 <div class="container">
                     <p><%= rev.overallStars %> OVERALL</p>
