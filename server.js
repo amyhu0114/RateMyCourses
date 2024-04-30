@@ -323,13 +323,13 @@ app.post("/join", async (req, res) => {
   returns a promise to update the database
   Helper function for the Post handler of the /review/ page
 */
-async function insertReview(db, courseId, difficulty, workload, text, userId, rating, accessibility, professor){
+async function insertReview(db, courseId, difficulty, workload, text, userId, rating, accessibility, professor, title){
   const counterCol = await db.collection('counters');
   const newId = await counter.incrCounter(counterCol, 'reviews');
   console.log(newId);
   let result = db.collection("reviews").insertOne({courseId: parseInt(courseId), contentDifficulty: parseInt(difficulty), 
     workloadRating: parseInt(workload), reviewText: text, userId: parseInt(userId), overallRating: parseInt(rating), 
-    accessibilityRating: parseInt(accessibility), professor: professor, upvotes: 0, downvotes: 0, reviewId: newId});
+    accessibilityRating: parseInt(accessibility), professor: professor, upvotes: 0, downvotes: 0, reviewId: newId, title: title});
   return result;
 }
 
@@ -358,7 +358,6 @@ app.get('/review/', requiresLogin, async (req, res) => {
   Inserts a review into the database, with the information submitted in the form
 */
 app.post("/review/", async (req, res) => {
-  console.log("HI")
   try {
     const db = await Connection.open(mongoUri, DBNAME);
     //getting relevant variables
@@ -370,16 +369,17 @@ app.post("/review/", async (req, res) => {
     var text = req.body.reviewText;
     var userId = req.session.userId;
     var professor = req.body.Professor;
+    var title = req.body.reviewTitle;
     console.log('professor: ',professor);
     if (professor == 'other' || professor == null){
       var newProf = req.body.newProf;
-      await insertReview(db, course_id, difficulty, workload, text, userId, rating, accessibility, newProf);
+      await insertReview(db, course_id, difficulty, workload, text, userId, rating, accessibility, newProf, title);
       await db.collection("courses").updateOne({courseId: parseInt(course_id)}, {$push: {professorNames: newProf}});
       //do something to add to course
     }
     else{
     //inserting the review
-    await insertReview(db, course_id, difficulty, workload, text, userId, rating, accessibility, professor);
+    await insertReview(db, course_id, difficulty, workload, text, userId, rating, accessibility, professor, title);
     }
     //flashing verification that the review is submitted, and redirecting to the home page
     req.flash("info", "You have successfully submitted a review!");
