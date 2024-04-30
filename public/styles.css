@@ -123,9 +123,9 @@ figure figcaption {
 }
 
 #errors p {
-  color: red;
+  color: rgb(87, 0, 0);
 }
 
 #info p {
-  color: orange;
+  color: rgb(32, 6, 138);
 }
