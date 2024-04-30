@@ -204,7 +204,8 @@ app.post("/join", async (req, res) => {
         return res.redirect('/')
       }
 
-      // given that the username does not exist, hash the password and add the user (userID, userName, hashed passwrod) to the user database
+      // given that the username does not exist, hash the password and add the user 
+      // (userID, userName, hashed passwrod) to the user database
       const hash = await bcrypt.hash(password, ROUNDS);
       const counterCol = db.collection('counters');
       // use the counter module to generate the next userID
@@ -242,7 +243,8 @@ app.post("/join", async (req, res) => {
         console.log("Username does not exist - try again.");
        return res.redirect('/')
       }
-      // given that the username exists, compare the hashed password stored in database with the hashed version of the password entered by the user
+      // given that the username exists, compare the hashed password stored in database with
+      // the hashed version of the password entered by the user
       const match = await bcrypt.compare(password, existingUser.hash); 
       console.log('match', match);
       if (!match) {
