@@ -76,11 +76,11 @@ action="/inputCourse/" >
     function loadProfessors(){
         var selectedID = $('[name="courseIdReview"]').find(':selected').val();
         $('[name="Professor"]').empty()
-        /*
-        console.log(selectedID)
-        console.log(profs[selectedID])
-        console.log(profs[selectedID.toString()])
-        */
+        if(profs[selectedID].length==0){
+            $('#professorSel').append(
+                "<label>New Professor <input type = textarea name = 'newProf'></input></label> "
+            );
+        }else{
         $('[name=Professor]').append(profs[selectedID].map(
             professorName => `<option> ${professorName} </option>`
             )
@@ -88,6 +88,7 @@ action="/inputCourse/" >
         $('[name="Professor"]').append(
             "<option id = 'other' value = 'other'>other</option>"
         )
+        }
     }
     function loadInputText(){
         console.log("loading input text")
