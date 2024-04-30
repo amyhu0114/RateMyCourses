@@ -30,21 +30,6 @@
      </Select></label><br><br>
   <p><button type="submit">Submit</button></p>
 </form>
-<script>
-    submit.addEventListener("click", validate);
-
-    function validate(e) {
-        e.preventDefault();
-
-        const courseCode = document.getElementById("courseCode");
-        let valid = true;
-
-        if (courseCode.value.indexOf(" ")!=-1) {
-            req.flash('error', 'Invalid stuff');
-        }
-        return valid;
-    }
-</script>
 
     <!-- load local js -->
     <script src="/main.js"></script>
