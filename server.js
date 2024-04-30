@@ -503,8 +503,12 @@ function searchLinkGenerator(searchResult) {
   return [`/course/${courseID}`, `${className}`]
 }
 
-
-//new route to "browse all courses" page
+/**
+ * Route to go to the "browse all courses" page, which is the search page with all available 
+ * results loaded. Also dynamically generates the filter by department dropdown options
+ * from the available departments listed in the database. 
+ * 
+ */
 app.get('/browse/', async (req, res) => {
   let queryDept = req.query.department;
   console.log(req.body);
