@@ -57,14 +57,23 @@ $("#allReviews")
         });
 
 
-function incVotes(upInc, downInc){
-    $.post('/increment-votes/', {upInc: upInc, downInc: downInc});
+function incVotes(reviewId, upInc, downInc){
+    $.post('/increment-votes/', {rid: reviewId, upInc: upInc, downInc: downInc});
 }
 
-$("#courseCard").some().on('click', 'button[data-role=voteBtn]', (event) => {
-    const totalVotesP = $(event.target).closest('p');
-    let totalNum = totalVotesP.text();
-    console.log(totalNum)
+$(".courseCard").one().on('click', 'button', (event) => {
+    const voteNum = $(event.target).closest('.courseCard').find('p[data-role=voteNum]');
+    const revId = voteNum.id;
+    const totalVotes = parseInt(voteNum.text());
+
+    const btnType = event.target.getAttribute('data-role');
+    if (btnType === 'downBtn') {
+        voteNum.text(totalVotes-1);
+    } else {
+        voteNum.text(totalVotes+1);
+    }
+    
+    
 })
 
 console.log('main.js loaded');

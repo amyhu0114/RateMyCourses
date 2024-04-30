@@ -35,9 +35,9 @@
                     <p><%= rev.accessibilityStars %> Accessibility</p>
                     <p><%= rev.contentStars %> Content Difficulty</p>
                 </div>
-                <button data-role="voteBtn" onclick=""><%= rev.upvotes %>↑</button>
-                <p><%= rev.upvotes - rev.downvotes%></p>
-                <button data-role="voteBtn"><%= rev.downvotes %>↓</button>
+                <button data-role="upBtn" onclick="">↑</button>
+                <p data-role="voteNum"><%= rev.upvotes - rev.downvotes%></p>
+                <button data-role="downBtn">↓</button>
             </div>
         <% }); %>
     </div>
