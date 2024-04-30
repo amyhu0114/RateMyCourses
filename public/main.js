@@ -33,20 +33,9 @@ function loginAjax() {
 
 $("#login-ajax").click(loginAjax);
 
-<<<<<<< HEAD
 // Ajax function to post the courseID to the /remove-review endpoint
 function removeReview(cID){
     $.post('/remove-review/', {cID: cID});
-=======
-function removeReview(cN){
-    $.post('/remove-review/', {cN: cN});
-    // console.log(`INSIDE removeReview ${cN}`)
-    // const req = new Request('/remove-review-ajax/', {method: 'POST',
-    //                                            body: `{"cN": "${cN}"}`}); // body: {"cN": cN}});
-    // fetch(req)
-    //     .then(nextIfOk)
-    //     .catch((error) => { console.error(error); });
->>>>>>> b326e62 (Updated README)
 }
 
 // Delegated handler to delete an review with the corresponding clicked button
@@ -56,17 +45,11 @@ $("#allReviews")
         'button[data-role=deleteReview]',
         function (event) {
             let cC = $(event.target).closest('.courseCard');
-<<<<<<< HEAD
             //let cN = $(cC).find('.courseName').text();
             let cID = $(cC).attr('id');
             console.log(`WITHIN HANDLER ${cID}`);
             // call function to POST to backend
             removeReview(cID);
-=======
-            let cN = $(cC).find('.courseName').text();
-            console.log(`WITHIN HANDLER ${cN}`);
-            removeReview(cN);
->>>>>>> b326e62 (Updated README)
             $(cC).remove();
         });
 
