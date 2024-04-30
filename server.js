@@ -366,7 +366,8 @@ app.post("/review/", async (req, res) => {
     var text = req.body.reviewText;
     var userId = req.session.userId;
     var professor = req.body.Professor;
-    if (professor == 'other'){
+    console.log('professor: ',professor);
+    if (professor == 'other' || professor == null){
       var newProf = req.body.newProf;
       await insertReview(db, course_id, difficulty, workload, text, userId, rating, accessibility, newProf);
       await db.collection("courses").updateOne({courseId: parseInt(course_id)}, {$push: {professor: newProf}});

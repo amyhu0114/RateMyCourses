@@ -21,7 +21,7 @@
      <label>Course Name: </label> 
      <input placeholder="Databases with Web Interfaces" name="courseName"><br><br> 
      <label>Course Code: </label> 
-     <input placeholder="CS304" name="courseCode"><br><br>
+     <input placeholder="CS304" name="courseCode" id = "courseCode"><br><br>
      <label>Department: </label> 
      <Select name = department>
         <% departments.forEach( (department) => {%>
@@ -30,6 +30,21 @@
      </Select><br><br>
   <p><button type="submit">Submit</button></p>
 </form>
+<script>
+    submit.addEventListener("click", validate);
+
+    function validate(e) {
+        e.preventDefault();
+
+        const courseCode = document.getElementById("courseCode");
+        let valid = true;
+
+        if (courseCode.value.indexOf(" ")!=-1) {
+            req.flash('error', 'Invalid stuff');
+        }
+        return valid;
+    }
+</script>
 
     <!-- load local js -->
     <script src="/main.js"></script>
