@@ -265,7 +265,7 @@ app.post("/join", async (req, res) => {
     }
   });
   
-  // POST handler to enable log out
+  // POST handler to enable log out by clearing/nullifying all session info
   app.post('/logout', (req,res) => {
     if (req.session.username) {
       // nullify the username and userID of the session and set loggedIn of the session to false
