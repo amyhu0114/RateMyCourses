@@ -61,17 +61,36 @@ function incVotes(reviewId, upInc, downInc){
 
 // Upvotes event handler
 $(".courseCard").one().on('click', 'button', (event) => {
-    // Get clicked card & review id
     const reviewCard = $(event.target).closest('.courseCard');
+    const voteNum = reviewCard.find('p[data-role=voteNum]');
     const revId = reviewCard.attr('id');
-    const btnType = event.target.getAttribute('data-role');
 
-    // Update on up/down button
+    const totalVotes = parseInt(voteNum.text());
+
+    const btnType = event.target.getAttribute('data-role');
+    let newVotes = 0;
     if (btnType === 'downBtn') {
-        incVotes(revId, 0, 1)
+        const newVotes = incVotes(revId, 0, 1)
+        voteNum.text(totalVotes-1);
     } else {
-        incVotes(revId, 1, 0);
+        const newVotes = incVotes(revId, 1, 0);
+        voteNum.text(totalVotes+1);
     }
+
+    
+    
+    
 })
 
 console.log('main.js loaded');
+
+/*
+function loadProfessors(){
+    $.get("/test/"+123, {}).then(processAction)
+
+
+}
+
+$('[name="courseIdReview"]').change(loadProfessors)
+*/
+

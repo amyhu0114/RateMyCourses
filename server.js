@@ -149,29 +149,30 @@ app.get('/course/:cid', async (req, res) => {
   // Get session data
   const loggedIn = (req.session.loggedIn) || false;
 
-  // TO DO IN ALPHA: implement summing for course ratings from avg of reviews
-  return res.render("course.ejs", {courseHeader: `${courseData.courseCode}: ${courseData.courseName}`,
-                                  courseSubheader: `${departmentName} - Taught By: ${courseData.professorNames.join(", ")}`,
-                                  overallStars: makeStars(4),
-                                  accessibilityStars: makeStars(5),
-                                  workloadStars: makeStars(2), 
-                                  contentStars: makeStars(4),
-                                  reviewList: reviewList,
-                                  loggedIn: loggedIn
+  return res.render("course.ejs", {
+        courseHeader: `${courseData.courseCode}: ${courseData.courseName}`,
+        courseSubheader: `${departmentName} - Taught By: ${courseData.professorNames.join(", ")}`,
+        overallStars: makeStars(4),
+        accessibilityStars: makeStars(5),
+        workloadStars: makeStars(2), 
+        contentStars: makeStars(4),
+        reviewList: reviewList,
+        loggedIn: loggedIn
                                 })
 
 })
 
+// Handles increment/decrementing upvotes & downvotes
 app.post('/increment-votes/', async (req, res) => {
-  console.log(req.body);
-  const rid = req.body.rid;
-  const upInc = req.body.upInc;
-  const downInc = req.body.downInc;
+  // Set relevant variables
+  const rid = parseInt(req.body.rid);
+  const upInc = parseInt(req.body.upInc);
+  const downInc = parseInt(req.body.downInc);
 
-  console.log(rid, upInc, downInc)
-
+  // Update database with new upvote/downvotes
   const db = await Connection.open(mongoUri, DTB);
-  await db.collection("reviews").updateOne({reviewId: rid, $inc: {upvotes: upInc}, $inc: {downvotess: downInc}});
+  await db.collection("reviews").updateOne({reviewId: rid}, 
+    {$inc: {upvotes: upInc}, $inc: {downvotes: downInc}});
   
 });
 
