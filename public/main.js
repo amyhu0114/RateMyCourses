@@ -70,10 +70,10 @@ $(".courseCard").one().on('click', 'button', (event) => {
     const btnType = event.target.getAttribute('data-role');
     let newVotes = 0;
     if (btnType === 'downBtn') {
-        const newVotes = incVotes(revId, 0, 1)
+        // const newVotes = incVotes(revId, 0, 1)
         voteNum.text(totalVotes-1);
     } else {
-        const newVotes = incVotes(revId, 1, 0);
+        // const newVotes = incVotes(revId, 1, 0);
         voteNum.text(totalVotes+1);
     }
 

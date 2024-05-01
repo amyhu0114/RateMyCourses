@@ -19,6 +19,7 @@ RateMyCourse lets Wellesley students rate their courses and view course ratings 
 
 **Features to be added in the Beta Version:**
 - Sorting and filtering courses on course pages
+- Database upvote/downvote increments
 - Adding professors for new courses
 
 ## Directions for use
