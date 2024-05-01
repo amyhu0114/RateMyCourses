@@ -17,7 +17,7 @@
       method="POST"
       action="/inputCourse/">
      <label>Course ID:  
-     <input placeholder=123" name="courseId"></label><br><br>
+     <input placeholder=123" type="number" name="courseId"></label><br><br>
      <label>Course Name:  
      <input placeholder="Databases with Web Interfaces" name="courseName"></label><br><br> 
      <label>Course Code:  
@@ -30,7 +30,17 @@
      </Select></label><br><br>
   <p><button type="submit">Submit</button></p>
 </form>
+    <script>
+        //preventing unwanted characters
+        function lettersAndNumbers(event){
+            var key = event.keyCode;
+            if ((key<48)||(key>57 && key <65)||(key>90 && key<97)||key>122) {
+            event.preventDefault();
+            }
+        }
+        document.querySelector('[name="courseCode"]').addEventListener('keypress', lettersAndNumbers)
 
+    </script>
     <!-- load local js -->
     <script src="/main.js"></script>
 </body>
