@@ -44,45 +44,34 @@ $("#allReviews")
         'button[data-role=deleteReview]',
         function (event) {
             let cC = $(event.target).closest('.courseCard');
-            //let cN = $(cC).find('.courseName').text();
             let cID = $(cC).attr('id');
             console.log(`WITHIN HANDLER ${cID}`);
+
             // call function to POST to backend
             removeReview(cID);
 
             $(cC).remove();
         });
 
-
+// Upvotes increment function
 function incVotes(reviewId, upInc, downInc){
-    $.post('/increment-votes/', {rid: reviewId, upInc: upInc, downInc: downInc});
+    const c1 = $.post('/increment-votes/', {rid: reviewId, upInc: upInc, downInc: downInc});
+    console.log(c1);
 }
 
+// Upvotes event handler
 $(".courseCard").one().on('click', 'button', (event) => {
-    const voteNum = $(event.target).closest('.courseCard').find('p[data-role=voteNum]');
-    const revId = voteNum.id;
-    const totalVotes = parseInt(voteNum.text());
-
+    // Get clicked card & review id
+    const reviewCard = $(event.target).closest('.courseCard');
+    const revId = reviewCard.attr('id');
     const btnType = event.target.getAttribute('data-role');
+
+    // Update on up/down button
     if (btnType === 'downBtn') {
-        const newVotes = incVotes(revId, 0, 1)
+        incVotes(revId, 0, 1)
     } else {
-        const newVotes = incVotes(revId, 1, 0);
+        incVotes(revId, 1, 0);
     }
-    voteNum.text(newVotes);
-    
-    
 })
 
 console.log('main.js loaded');
-
-/*
-function loadProfessors(){
-    $.get("/test/"+123, {}).then(processAction)
-
-
-}
-
-$('[name="courseIdReview"]').change(loadProfessors)
-*/
-
