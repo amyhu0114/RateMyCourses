@@ -168,7 +168,9 @@ app.post('/increment-votes/', async (req, res) => {
   const upInc = req.body.upInc;
   const downInc = req.body.downInc;
 
-  const db = Connection.open(mongoUri, DTB);
+  console.log(rid, upInc, downInc)
+
+  const db = await Connection.open(mongoUri, DTB);
   await db.collection("reviews").updateOne({reviewId: rid, $inc: {upvotes: upInc}, $inc: {downvotess: downInc}});
   
 });
