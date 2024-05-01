@@ -104,7 +104,7 @@ async function formatReveiws(reviewData) {
     const courseList = await db.collection('courses').find({courseId: parseInt(cid)}).toArray();
     const courseName = courseList[0].courseName;
 
-
+    // Format course data
     return {workloadStars: makeStars(workloadNum),
             accessibilityStars: makeStars(accessibilityNum),
             contentStars: makeStars(contentNum),
@@ -119,21 +119,6 @@ async function formatReveiws(reviewData) {
             }
   }));
   return reviewList;
-}
-
-async function resetIds(colName) {
-  const db = await Connection.open(mongoUri, DTB);
-  const counterCol = db.collection('counters');
-  counter.resetCounter(counterCol, 'reviews', 0);
-  var documents = await db.collection(colName).find().toArray();
-
-  documents.forEach(async function(doc) {
-    let newId = await counter.incrCounter(counterCol, 'reviews');
-    db.collection(colName).updateOne({ '_id': doc._id }, {
-        '$set': { 'reviewId': newId }
-    });
-});
-
 }
 
 app.get('/course/:cid', async (req, res) => {

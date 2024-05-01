@@ -32,9 +32,8 @@ function loginAjax() {
 }
 
 $("#login-ajax").click(loginAjax);
-
-// Ajax function to post the courseID to the /remove-review endpoint
-function removeReview(cID){
+    // Ajax function to post the courseID to the /remove-review endpoint
+    function removeReview(cID){
     $.post('/remove-review/', {cID: cID});
 }
 
@@ -50,6 +49,7 @@ $("#allReviews")
             console.log(`WITHIN HANDLER ${cID}`);
             // call function to POST to backend
             removeReview(cID);
+
             $(cC).remove();
         });
 
