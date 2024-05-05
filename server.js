@@ -386,7 +386,9 @@ app.post("/review/", async (req, res) => {
   takes in database, courseID, course name, course code, department id, and a list of professors
   returns a promise to update the database
 */
-function insertCourse(db, course_id, course_name, course_code, department_id, professor_list){
+async function insertCourse(db, course_name, course_code, department_id, professor_list){
+  const counterCol = await db.collection('counters');
+  const course_id = await counter.incrCounter(counterCol, 'courses');
   let result = db.collection("courses").insertOne({courseId: parseInt(course_id), courseName: course_name, 
     courseCode: course_code, departmentId: parseInt(department_id), professorNames: professor_list});
   return result;
@@ -419,12 +421,11 @@ app.post("/inputCourse/", async (req, res) => {
   try {
     const db = await Connection.open(mongoUri, DBNAME);
     //getting the relevant variables
-    var course_id = req.body.courseId;
     var course_name = req.body.courseName;
     var course_code = req.body.courseCode;
     var department_id = req.body.department;
     //inserting the course
-    insertCourse(db, course_id, course_name, course_code, department_id, []);
+    insertCourse(db, course_name, course_code, department_id, []);
     //flashing and redirecting after insertion
     req.flash("info", "You have successfully submitted a Course!");
     return res.redirect('/review/');
