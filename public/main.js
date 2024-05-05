@@ -54,9 +54,11 @@ $("#allReviews")
         });
 
 // Upvotes increment function
-function incVotes(reviewId, upInc, downInc){
-    const c1 = $.post('/increment-votes/', {rid: reviewId, upInc: upInc, downInc: downInc});
-    console.log(c1);
+async function incVotes(reviewId, upInc, downInc){
+    const nt2 = await $.post('/increment-votes/', {rid: reviewId, upInc: upInc, downInc: downInc}, function(data, status){
+        console.log("DATA", data);
+      });
+    console.log("nt2", nt2);
 }
 
 // Upvotes event handler
@@ -68,13 +70,13 @@ $(".courseCard").one().on('click', 'button', (event) => {
     const totalVotes = parseInt(voteNum.text());
 
     const btnType = event.target.getAttribute('data-role');
-    let newVotes = 0;
     if (btnType === 'downBtn') {
-        // const newVotes = incVotes(revId, 0, 1)
-        voteNum.text(totalVotes-1);
+        const newVotes = incVotes(revId, 0, 1)
+        console.log("newVotes", newVotes)
+        // voteNum.text(totalVotes-1);
     } else {
-        // const newVotes = incVotes(revId, 1, 0);
-        voteNum.text(totalVotes+1);
+        const newVotes = incVotes(revId, 1, 0);
+        // voteNum.text(totalVotes+1);
     }
 
     

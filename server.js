@@ -171,8 +171,16 @@ app.post('/increment-votes/', async (req, res) => {
 
   // Update database with new upvote/downvotes
   const db = await Connection.open(mongoUri, DTB);
-  await db.collection("reviews").updateOne({reviewId: rid}, 
-    {$inc: {upvotes: upInc}, $inc: {downvotes: downInc}});
+  const rev = await db.collection("reviews").findOneAndUpdate({reviewId: rid}, 
+    {$inc: {upvotes: upInc, downvotes: downInc}});
+  const newTotal = rev.upvotes - rev.downvotes;
+  console.log("newTotal", newTotal)
+
+  return newTotal;
+  
+  // const r1 = await db.collection("reviews").find({reviewId: rid}).toArray();
+  // console.log(r1)
+  
   
 });
 
