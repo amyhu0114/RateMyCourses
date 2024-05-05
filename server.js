@@ -463,7 +463,8 @@ app.get('/search/', async (req, res) => {
   console.log("Depts list: ", listOfDepts);
   
   //search database for term
-  let searchResults = await db.collection("courses").find({courseCode: {$regex: customRegex}}).project({_id: 0, courseCode: 1, courseId: 1}).toArray();
+  let searchResults = await db.collection("courses").find({courseCode: {$regex: customRegex}})
+  .project({_id: 0, courseCode: 1, courseId: 1}).toArray();
   console.log(searchResults);
   console.log("successfully queried database");
 
@@ -491,7 +492,8 @@ app.get('/search/', async (req, res) => {
 })
 /**
  * Function for generating search results with clickable hyperlinks
- * @param {*} searchResult tuple containing coursecode and coursename info from database
+ * @param {*} searchResult tuple containing coursecode and coursename 
+ * info from database
  * @returns hyperlink and class name to be displayed on site
  */
 function searchLinkGenerator(searchResult) {
@@ -502,8 +504,9 @@ function searchLinkGenerator(searchResult) {
 }
 
 /**
- * Route to go to the "browse all courses" page, which is the search page with all available 
- * results loaded. Also dynamically generates the filter by department dropdown options
+ * Route to go to the "browse all courses" page, which is the 
+ * search page with all available results loaded. Also dynamically 
+ * generates the filter by department dropdown options
  * from the available departments listed in the database. 
  * 
  */
@@ -523,7 +526,8 @@ app.get('/browse/', async (req, res) => {
 
   const loggedIn = (req.session.loggedIn) || false;
 
-  let searchResults = await db.collection("courses").find({departmentId: deptIdInt}).toArray();
+  let searchResults = await db.collection("courses")
+  .find({departmentId: deptIdInt}).toArray();
 
   let listOfDepts = await db.collection("departments").find().toArray();
   //now we have our list of search results
