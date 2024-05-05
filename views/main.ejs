@@ -15,53 +15,29 @@
     <%- include("partials/flashes.ejs") %>
 <main>
 
-    <form id ="myForm" method = "GET" action = "/search/">
-        <p>
-            <label>
-                search for a class: 
-                <input type ="text" required name = "term">
-            </label>
-            <input type = "submit" value = "search" id="searchbutton">
-        </p>
-    </form>
-
-    <form id="browsebutton" method = "GET" action = "/search/">
-        <p>
-            <input type = "submit" value = "Browse All Courses" id = "browsebutton">
-        </p>
-    </form>
-
-    <h1>RateMyCourse</h1>
     <img src="/RateMyCourseLogo.PNG" alt ="image" id="hp">
 
-    <p>A web application by Amy, Nya, Sophia, and Nico</p>
+    <div id = "searchbox">
+        <form id ="myForm" method = "GET" action = "/search/">
+            <p>
+                <label>
+                    Search for a class: 
+                    <input type ="text" required name = "term">
+                </label>
+                <input type = "submit" value = "search" id="searchbutton">
+            </p>
+        </form>
 
-    
-    <!-- Forms for register and login -->
-    <h2>Register:</h2>
-  <p>
-    <form action="/join" method="POST">
-        <label> Username
-            <input type="text" name="username" placeholder="og102">
-        </label>
-        <label> Password
-            <input type="text" name="password" placeholder="********">
-        </label>
-      <button type="submit">register</button>
-    </form>
-  </p>
-  <h2>Login:</h2>
-  <p>
-    <form action="/login" method="POST">
-        <label> Username
-            <input type="text" name="username" placeholder="og102">
-        </label>
-        <label> Password
-            <input type="text" name="password" placeholder="********">
-        </label>
-      <button type="submit">login</button>
-    </form>
-  </p>
+        <form id="browsebutton" method = "GET" action = "/search/">
+            <p>
+                <input type = "submit" value = "Browse All Courses" id = "browsebutton">
+            </p>
+        </form>
+    </div>
+
+    <h1>RateMyCourse</h1>
+
+    <p>A web application by Amy, Nya, Sophia, and Nico</p>
 
 
 </main>

@@ -554,6 +554,23 @@ app.get('/browse/', async (req, res) => {
   return res.render("searchbrowser.ejs");
 })
 
+/**
+ * route to send the user to the signup prompt page
+ */
+app.get('/signup/', async (req, res) => {
+
+  return res.render("signup.ejs")
+
+})
+
+/**
+ * route to send the user to the login
+ */
+app.get('/login/', async (req, res) => {
+
+  return res.render("login.ejs")
+
+})
 
 //================End of Nico Work =================================
 
