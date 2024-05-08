@@ -80,7 +80,28 @@ app.get('/', (req, res) => {
  * @returns {string} star representation of given number
  */
 function makeStars(starNum) {
+  starNum = Math.floor(starNum);
   return '★'.repeat(starNum) + '☆'.repeat(5-starNum);
+}
+
+async function getAvgRatings(courseId) {
+  const db = await Connection.open(mongoUri, DTB);
+  const rating = await db.collection("reviews").aggregate(
+    [
+      {$match: {courseId: courseId}}, 
+      {$group: 
+        {
+          _id: "$courseId", 
+          overall: {$avg: "$overallRating"},
+          workload: {$avg: "$workloadRating"},
+          content: {$avg: "$contentDifficulty"},
+          accessibility: {$avg: "$accessibilityRating"}
+        }
+      }
+    ]
+  ).toArray();
+
+  return rating.length == 0 ? 0 : rating[0];
 }
 
 /**
@@ -146,16 +167,25 @@ app.get('/course/:cid', async (req, res) => {
   const reviewData = await db.collection('reviews').find({courseId: parseInt(cid)}).toArray();
   const reviewList = await formatReveiws(reviewData);
 
+  // Get average ratings data
+  const ratings = await getAvgRatings(parseInt(cid));
+
   // Get session data
   const loggedIn = (req.session.loggedIn) || false;
+
+  
 
   return res.render("course.ejs", {
         courseHeader: `${courseData.courseCode}: ${courseData.courseName}`,
         courseSubheader: `${departmentName} - Taught By: ${courseData.professorNames.join(", ")}`,
-        overallStars: makeStars(4),
-        accessibilityStars: makeStars(5),
-        workloadStars: makeStars(2), 
-        contentStars: makeStars(4),
+        overallStars: makeStars(ratings.overall),
+        accessibilityStars: makeStars(ratings.accessibility),
+        workloadStars: makeStars(ratings.workload), 
+        contentStars: makeStars(ratings.content),
+        overallNum: ratings.overall,
+        accessibilityNum: ratings.accessibility,
+        workloadNum: ratings.workload,
+        contentNum: ratings.content,
         reviewList: reviewList,
         loggedIn: loggedIn
                                 })

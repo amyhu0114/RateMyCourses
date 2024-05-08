@@ -78,11 +78,17 @@ $(".courseCard").one().on('click', 'button', (event) => {
         const newVotes = incVotes(revId, 1, 0);
         // voteNum.text(totalVotes+1);
     }
-
-    
-    
-    
 })
+
+/**
+ * Calculates the given number out of a 5-point scale represented with star symbols.
+ * @param {number} starNum 
+ * @returns {string} star representation of given number
+ */
+function makeStars(starNum) {
+    starNum = Math.floor(starNum);
+    return '★'.repeat(starNum) + '☆'.repeat(5-starNum);
+  }
 
 console.log('main.js loaded');
 
