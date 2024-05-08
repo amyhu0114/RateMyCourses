@@ -53,6 +53,26 @@ app.use(cookieSession({
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 
+app.use('/uploads', express.static('uploads'));
+
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads')
+  },
+  filename: function (req, file, cb) {
+      let parts = file.originalname.split('.');
+      let ext = parts[parts.length-1];
+      let hhmmss = timeString();
+      cb(null, file.fieldname + '-' + hhmmss + '.' + ext);
+  }
+})
+
+var upload = multer({ storage: storage,
+  // max fileSize in bytes, causes an ugly error
+  limits: {fileSize: 1_000 }});
+
+const UNPROT = 'syllabi'
+
 const ROUNDS = 15;
 
 // ================================================================
@@ -201,16 +221,8 @@ app.post('/increment-votes/', async (req, res) => {
 
   // Update database with new upvote/downvotes
   const db = await Connection.open(mongoUri, DTB);
-  const rev = await db.collection("reviews").findOneAndUpdate({reviewId: rid}, 
-    {$inc: {upvotes: upInc, downvotes: downInc}});
-  const newTotal = rev.upvotes - rev.downvotes;
-  console.log("newTotal", newTotal)
-
-  return newTotal;
-  
-  // const r1 = await db.collection("reviews").find({reviewId: rid}).toArray();
-  // console.log(r1)
-  
+  await db.collection("reviews").updateOne({reviewId: rid}, 
+    {$inc: {upvotes: upInc}, $inc: {downvotes: downInc}});
   
 });
 
@@ -296,8 +308,8 @@ app.post("/join", async (req, res) => {
     }
   });
   
-  // POST handler to enable log out by clearing/nullifying all session info
-  app.post('/logout', (req,res) => {
+  // GET handler to enable log out by clearing/nullifying all session info
+  app.get('/logout/', async (req,res) => {
     if (req.session.username) {
       // nullify the username and userID of the session and set loggedIn of the session to false
       req.session.username = null;
@@ -420,6 +432,38 @@ app.post("/review/", async (req, res) => {
   }
 });
 
+/*uploading syllabi*/
+
+function timeString(dateObj) {
+  if( !dateObj) {
+      dateObj = new Date();
+  }
+  // convert val to two-digit string
+  d2 = (val) => val < 10 ? '0'+val : ''+val;
+  let hh = d2(dateObj.getHours())
+  let mm = d2(dateObj.getMinutes())
+  let ss = d2(dateObj.getSeconds())
+  return hh+mm+ss
+}
+
+app.post('/upload', upload.single('photo'), async (req, res) => {
+  console.log('uploaded data', req.body);
+  console.log('file', req.file);
+  // insert file data into mongodb
+  const db = await Connection.open(mongoUri, DBNAME);
+  const unprot = db.collection(UNPROT);
+  const result = await unprot.insertOne({title: req.body.title,
+                                         path: '/uploads/'+req.file.filename});
+  console.log('insertOne result', result);
+  return res.redirect('/');
+});
+
+app.get('/uploads/', async (req, res) => {
+  const db = await Connection.open(mongoUri, DB);
+  let files = await db.collection(FILES).find({}).toArray();
+  return res.render('uploadSyllabus.ejs', {uploads: files});
+});
+
 /* funtion to insert courses, helper function for the /inputCourse/ POST handler
   takes in database, courseID, course name, course code, department id, and a list of professors
   returns a promise to update the database
@@ -501,8 +545,7 @@ app.get('/search/', async (req, res) => {
   console.log("Depts list: ", listOfDepts);
   
   //search database for term
-  let searchResults = await db.collection("courses").find({courseCode: {$regex: customRegex}})
-  .project({_id: 0, courseCode: 1, courseId: 1}).toArray();
+  let searchResults = await db.collection("courses").find({courseCode: {$regex: customRegex}}).project({_id: 0, courseCode: 1, courseId: 1}).toArray();
   console.log(searchResults);
   console.log("successfully queried database");
 
@@ -530,8 +573,7 @@ app.get('/search/', async (req, res) => {
 })
 /**
  * Function for generating search results with clickable hyperlinks
- * @param {*} searchResult tuple containing coursecode and coursename 
- * info from database
+ * @param {*} searchResult tuple containing coursecode and coursename info from database
  * @returns hyperlink and class name to be displayed on site
  */
 function searchLinkGenerator(searchResult) {
@@ -542,9 +584,8 @@ function searchLinkGenerator(searchResult) {
 }
 
 /**
- * Route to go to the "browse all courses" page, which is the 
- * search page with all available results loaded. Also dynamically 
- * generates the filter by department dropdown options
+ * Route to go to the "browse all courses" page, which is the search page with all available 
+ * results loaded. Also dynamically generates the filter by department dropdown options
  * from the available departments listed in the database. 
  * 
  */
@@ -564,8 +605,7 @@ app.get('/browse/', async (req, res) => {
 
   const loggedIn = (req.session.loggedIn) || false;
 
-  let searchResults = await db.collection("courses")
-  .find({departmentId: deptIdInt}).toArray();
+  let searchResults = await db.collection("courses").find({departmentId: deptIdInt}).toArray();
 
   let listOfDepts = await db.collection("departments").find().toArray();
   //now we have our list of search results
@@ -592,6 +632,23 @@ app.get('/browse/', async (req, res) => {
   return res.render("searchbrowser.ejs");
 })
 
+/**
+ * route to send the user to the signup prompt page
+ */
+app.get('/signup/', async (req, res) => {
+
+  return res.render("signup.ejs")
+
+})
+
+/**
+ * route to send the user to the login
+ */
+app.get('/login/', async (req, res) => {
+
+  return res.render("login.ejs")
+
+})
 
 //================End of Nico Work =================================
 

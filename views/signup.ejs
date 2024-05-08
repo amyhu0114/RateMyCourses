@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/3.0.3/normalize.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <meta name=author content="Your name here">
+    <title>RateMyCourse</title>
+</head>
+<body>
+
+    <%- include("partials/navbar.ejs", {loggedIn: loggedIn}) %>
+
+    <%- include("partials/flashes.ejs") %>
+<main>
+
+    <img src="/RateMyCourseLogo.PNG" alt ="image" id="signuplogo">
+
+<div id = "rcorners2">
+    <!-- Forms for register and login -->
+    <form action="/join" method="POST" id = "textinput">
+        <p>
+        <label> Username
+            <input type="text" name="username" placeholder="og102">
+        </label>
+        </p>
+        <p>
+        <label> Password
+            <input type="text" name="password" placeholder="********">
+        </label>
+        </p>
+        <p>
+            <button type="submit" id = "signupbutton">register</button>
+        </p>
+    </form>
+
+</div>
+
+</main>
+
+<!-- JavaScript at the bottom -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cs.wellesley.edu/~anderson/js/bounds/bounds-plugin.js"></script>
+<script src="server.js"></script>
+</body>
+</html>
