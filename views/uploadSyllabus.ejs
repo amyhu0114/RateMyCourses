@@ -15,7 +15,8 @@
    <div class="container">
     <% uploads.forEach( file => { %>
       <figure>
-        <img class="uploadedImg" src="<%= file.path %>" alt="<%= file.title %>">
+        <!-- <img class="uploadedImg" src="<%= file.path %>" alt="<%= file.title %>"> -->
+        <embed src="<%= file.path %>" width="800px" height="2100px" />
         <figcaption><%= file.title || 'Untitled' %></figcaption>
       </figure>
     <% }) %>

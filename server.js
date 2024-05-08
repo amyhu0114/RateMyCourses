@@ -53,25 +53,55 @@ app.use(cookieSession({
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 
+// configure MUlter
+
 app.use('/uploads', express.static('uploads'));
+
+function timeString(dateObj) {
+  if( !dateObj) {
+      dateObj = new Date();
+  }
+  // convert val to two-digit string
+  d2 = (val) => val < 10 ? '0'+val : ''+val;
+  let hh = d2(dateObj.getHours())
+  let mm = d2(dateObj.getMinutes())
+  let ss = d2(dateObj.getSeconds())
+  return hh+mm+ss
+}
+
+const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png','.pdf' ];
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads')
+      cb(null, 'uploads')
   },
   filename: function (req, file, cb) {
-      let parts = file.originalname.split('.');
-      let ext = parts[parts.length-1];
+      // the path module provides a function that returns the extension
+      let ext = path.extname(file.originalname).toLowerCase();
+      console.log('extension', ext);
       let hhmmss = timeString();
-      cb(null, file.fieldname + '-' + hhmmss + '.' + ext);
+      cb(null, file.fieldname + '-' + hhmmss + ext);
   }
 })
 
-var upload = multer({ storage: storage,
-  // max fileSize in bytes, causes an ugly error
-  limits: {fileSize: 1_000 }});
+var upload = multer(
+  { storage: storage,
+    // check whether the file should be allowed
+    // should also install and use mime-types
+    // https://www.npmjs.com/package/mime-types
+    fileFilter: function(req, file, cb) {
+        let ext = path.extname(file.originalname).toLowerCase();
+        let ok = ALLOWED_EXTENSIONS.includes(ext);
+        console.log('file ok', ok);
+        if(ok) {
+            cb(null, true);
+        } else {
+            cb(null, false, new Error('not an allowed extension:'+ext));
+        }
+    },
+    // max fileSize in bytes
+    limits: {fileSize: 1_000_000 }});
 
-const UNPROT = 'syllabi'
 
 const ROUNDS = 15;
 
@@ -81,6 +111,7 @@ const ROUNDS = 15;
 const DTB = 'RateMyCourse';
 const WMDB = 'wmdb';
 const STAFF = 'staff';
+const FILES = 'files';
 
 // main page. This shows the use of session cookies
 app.get('/', (req, res) => {
@@ -434,32 +465,22 @@ app.post("/review/", async (req, res) => {
 
 /*uploading syllabi*/
 
-function timeString(dateObj) {
-  if( !dateObj) {
-      dateObj = new Date();
-  }
-  // convert val to two-digit string
-  d2 = (val) => val < 10 ? '0'+val : ''+val;
-  let hh = d2(dateObj.getHours())
-  let mm = d2(dateObj.getMinutes())
-  let ss = d2(dateObj.getSeconds())
-  return hh+mm+ss
-}
-
 app.post('/upload', upload.single('photo'), async (req, res) => {
+  console.log("AAAAAA");
   console.log('uploaded data', req.body);
   console.log('file', req.file);
   // insert file data into mongodb
   const db = await Connection.open(mongoUri, DBNAME);
-  const unprot = db.collection(UNPROT);
+  const unprot = db.collection(FILES);
   const result = await unprot.insertOne({title: req.body.title,
                                          path: '/uploads/'+req.file.filename});
   console.log('insertOne result', result);
+  req.flash('info', 'file uploaded');
   return res.redirect('/');
 });
 
 app.get('/uploads/', async (req, res) => {
-  const db = await Connection.open(mongoUri, DB);
+  const db = await Connection.open(mongoUri, DBNAME);
   let files = await db.collection(FILES).find({}).toArray();
   return res.render('uploadSyllabus.ejs', {uploads: files});
 });
