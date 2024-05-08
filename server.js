@@ -20,7 +20,8 @@ const multer = require('multer');
 
 const { Connection } = require('./connection');
 const cs304 = require('./cs304');
-const counter = require('./counter-utils.js')
+const counter = require('./counter-utils.js');
+const { filter } = require('bluebird');
 
 
 // Create and configure the app
@@ -156,7 +157,8 @@ async function formatReveiws(reviewData) {
             downvotes: reviewObj.downvotes,
             id: reviewObj.reviewId,
             courseId: parseInt(reviewObj.courseId),
-            title: title
+            title: title,
+            professor: 'professor' in reviewObj ? reviewObj.professor : null,
             }
   }));
   return reviewList;
@@ -166,6 +168,9 @@ app.get('/course/:cid', async (req, res) => {
   // Set relevant variables
   const cid = req.params.cid;
   const db = await Connection.open(mongoUri, DTB);
+  const filterRating = parseInt(req.query.rating);
+  const filterProf = req.query.professor;
+  console.log(filterRating, filterProf)
 
   // Get course data
   const courseList = await db.collection('courses').find({courseId: parseInt(cid)}).toArray();
@@ -184,7 +189,17 @@ app.get('/course/:cid', async (req, res) => {
   const departmentName = deptList[0].departmentName;
 
   // Get review data
-  const reviewData = await db.collection('reviews').find({courseId: parseInt(cid)}).toArray();
+  const query = {courseId: parseInt(cid)};
+  if (!isNaN(filterRating)) {
+    query['overallRating'] = filterRating;
+  }
+  if (filterProf !== "" && filterProf !== undefined) {
+    query['professor'] = filterProf;
+  }
+
+  console.log("query", query)
+
+  const reviewData = await db.collection('reviews').find(query).toArray();
   const reviewList = await formatReveiws(reviewData);
 
   // Get average ratings data
@@ -196,24 +211,28 @@ app.get('/course/:cid', async (req, res) => {
   
 
   return res.render("course.ejs", {
+        cid: courseData.courseId,
         courseHeader: `${courseData.courseCode}: ${courseData.courseName}`,
         courseSubheader: `${departmentName} - Taught By: ${courseData.professorNames.join(", ")}`,
+        professors: courseData.professorNames,
         overallStars: makeStars(ratings.overall),
         accessibilityStars: makeStars(ratings.accessibility),
         workloadStars: makeStars(ratings.workload), 
         contentStars: makeStars(ratings.content),
-        overallNum: ratings.overall,
-        accessibilityNum: ratings.accessibility,
-        workloadNum: ratings.workload,
-        contentNum: ratings.content,
+        overallNum: ratings.overall.toFixed(2),
+        accessibilityNum: ratings.accessibility.toFixed(2),
+        workloadNum: ratings.workload.toFixed(2),
+        contentNum: ratings.content.toFixed(2),
         reviewList: reviewList,
-        loggedIn: loggedIn
+        loggedIn: loggedIn,
+        filterProf: filterProf,
+        filterRating: filterRating,
                                 })
 
 })
 
 // Handles increment/decrementing upvotes & downvotes
-app.post('/increment-votes/', async (req, res) => {
+app.post('/increment-votes/', async (req, res) => {  
   // Set relevant variables
   const rid = parseInt(req.body.rid);
   const upInc = parseInt(req.body.upInc);
@@ -222,7 +241,11 @@ app.post('/increment-votes/', async (req, res) => {
   // Update database with new upvote/downvotes
   const db = await Connection.open(mongoUri, DTB);
   await db.collection("reviews").updateOne({reviewId: rid}, 
-    {$inc: {upvotes: upInc}, $inc: {downvotes: downInc}});
+    {$inc: {upvotes: upInc, downvotes: downInc}});
+
+  // Get & return new total votes
+  const review = await db.collection("reviews").findOne({reviewId: rid});
+  return res.json({totalVotes: review.upvotes-review.downvotes});
   
 });
 

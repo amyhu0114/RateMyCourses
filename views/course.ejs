@@ -22,24 +22,60 @@
             <p><b>Workload</b> <%= workloadStars %> <%= workloadNum %> </p>
         </div>
     </div>
+    <form id="filter" method="GET" action="/course/<%= cid %>">
+        <p>
+            <label>
+                <b>Filter by:</b>
+            </label>
+            <select name="rating">
+                <option value="">Choose Rating</option>
+                
+                <% [1,2,3,4,5].forEach((rating) => { %>
+                    <% if (rating === filterRating) {%> 
+                        <option value="<%= rating %>" selected="selected"><%= rating %></option> <%} else {%>
+                        <option value="<%= rating %>">{makeStars(<%= rating %>)}</option> <% } %>
+                <% }); %>
+
+
+                <option value=5>★★★★★</option>
+                <option value=4>★★★★☆</option>
+                <option value=3>★★★☆☆</option>
+                <option value=2>★★☆☆☆</option>
+                <option value=1>★☆☆☆☆</option>
+            </select>
+            <select name="professor">
+                <option value="">Choose Professor</option>
+                <% professors.forEach((prof) => { %>
+                    <% if (prof === filterProf) {%> 
+                        <option selected="selected"><%= prof %></option> <%} else {%>
+                        <option><%= prof %></option> <% } %>
+                <% }); %>
+            </select>
+            <input type="submit" value="Filter" id="searchbutton">
+        </p>
+    </form>
     <br>
 
-    <div>
-        <% reviewList.forEach((rev) => {  %>
-            <div class="courseCard" id=<%= rev.id %>>
-                <p class="reviewTitle"><%= rev.title%></p>
-                <p><%= rev.text %></p>
-                <div class="container">
-                    <p><%= rev.overallStars %> OVERALL</p>
-                    <p><%= rev.workloadStars %> Workload</p>
-                    <p><%= rev.accessibilityStars %> Accessibility</p>
-                    <p><%= rev.contentStars %> Content Difficulty</p>
+    <div class="reviewBox">
+        <% if (reviewList.length == 0) { %>
+            No results for this search! <% } else { %>
+            <% reviewList.forEach((rev) => {  %>
+                <div class="courseCard" id=<%= rev.id %>>
+                    <p class="reviewTitle"><%= rev.title%></p>
+                    <% if (rev.professor != null) { %><p>Professor: <%= rev.professor %></p> <% }%>
+                    <p><%= rev.text %></p>
+                    <div class="container">
+                        <p><%= rev.overallStars %> OVERALL</p>
+                        <p><%= rev.workloadStars %> Workload</p>
+                        <p><%= rev.accessibilityStars %> Accessibility</p>
+                        <p><%= rev.contentStars %> Content Difficulty</p>
+                    </div>
+                    <button data-role="upBtn" onclick="">↑</button>
+                    <p data-role="voteNum"><%= rev.upvotes - rev.downvotes%></p>
+                    <button data-role="downBtn">↓</button>
                 </div>
-                <button data-role="upBtn" onclick="">↑</button>
-                <p data-role="voteNum"><%= rev.upvotes - rev.downvotes%></p>
-                <button data-role="downBtn">↓</button>
-            </div>
-        <% }); %>
+            <% }); %>
+        <% } %>
     </div>
 </body>
 <script src="/main.js"></script>

@@ -53,13 +53,23 @@ $("#allReviews")
             $(cC).remove();
         });
 
-// Upvotes increment function
-async function incVotes(reviewId, upInc, downInc){
-    const nt2 = await $.post('/increment-votes/', {rid: reviewId, upInc: upInc, downInc: downInc}, function(data, status){
-        console.log("DATA", data);
-      });
-    console.log("nt2", nt2);
+// // Upvotes increment function
+// async function incVotes(reviewId, upInc, downInc){
+//     await $.post('/increment-votes/', {rid: reviewId, upInc: upInc, downInc: downInc}, function(data){
+//         console.log("DATA", data);
+//       });
+//     console.log("nt2", nt2);
+// }
+
+
+function incVotes(reviewId, upInc, downInc, votesElement){
+    console.log("here1")
+    $.post('/increment-votes/', {rid: reviewId, upInc: upInc, downInc: downInc}, function(data){
+        votesElement.text(data.totalVotes)
+    });
 }
+
+
 
 // Upvotes event handler
 $(".courseCard").one().on('click', 'button', (event) => {
@@ -71,11 +81,15 @@ $(".courseCard").one().on('click', 'button', (event) => {
 
     const btnType = event.target.getAttribute('data-role');
     if (btnType === 'downBtn') {
-        const newVotes = incVotes(revId, 0, 1)
-        console.log("newVotes", newVotes)
+        console.log("DOWN");
+        incVotes(revId, 0, 1, voteNum);
+        // console.log("newVotes", newVotes)
         // voteNum.text(totalVotes-1);
     } else {
-        const newVotes = incVotes(revId, 1, 0);
+        console.log("UP");
+        // const newVotes = incVotes(revId, 1, 0);
+        incVotes(revId, 1, 0, voteNum);
+
         // voteNum.text(totalVotes+1);
     }
 })
@@ -91,6 +105,7 @@ function makeStars(starNum) {
   }
 
 console.log('main.js loaded');
+
 
 /*
 function loadProfessors(){
