@@ -94,6 +94,7 @@ action="/inputCourse/" >
     }
     function loadInputText(){
         console.log("loading input text")
+        $('#professorSel').empty();
         if ($(this).val() === 'other'){
             $('#professorSel').append(
                 "<label>New Professor <input type = textarea name = 'newProf'></input></label> "
