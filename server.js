@@ -488,7 +488,7 @@ app.post("/review/", async (req, res) => {
 
 /*uploading syllabi*/
 
-app.post('/upload', upload.single('photo'), async (req, res) => {
+app.post('/upload/:cid', upload.single('photo'), async (req, res) => {
   console.log("AAAAAA");
   console.log('uploaded data', req.body);
   console.log('file', req.file);
@@ -496,6 +496,7 @@ app.post('/upload', upload.single('photo'), async (req, res) => {
   const db = await Connection.open(mongoUri, DBNAME);
   const unprot = db.collection(FILES);
   const result = await unprot.insertOne({title: req.body.title,
+                                         courseId: req.params.cid,
                                          path: '/uploads/'+req.file.filename});
   console.log('insertOne result', result);
   req.flash('info', 'file uploaded');
