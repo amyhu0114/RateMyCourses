@@ -21,25 +21,23 @@
             <p><b>Content Difficulty</b> <%= contentStars %> <%= contentNum %> </p>
             <p><b>Workload</b> <%= workloadStars %> <%= workloadNum %> </p>
         </div>
-    <div class = right>
+    <div>
         <form
         id="new course"
         method="GET"
         action="/upload/<%= cid %>" >
-           <button type="submit">View Syllabi</button>
+           <p><button type="submit">View Syllabi</button></p>
         </form>
         <% if(loggedIn){ %>
-            <form action="/upload/<%= cid %>" method="POST" enctype="multipart/form-data">
-                <p> Input Syllabus: </p>
-                <p></p>
-                    <label for="title">title
+            <form action="/upload/<%= cid %>" method="POST" enctype="multipart/form-data" class = "right">
+                <p>Input Syllabus:</p>
+                    <p><label for="title">title
                         <input type="text" name="title" placeholder="photo title">
-                    </label>
-                </p><p>
-                    <label>file
+                    </label></p>
+                    <p><label>file
                         <input type="file" accept=".pdf" name="photo" >
-                    </label>
-                </p><p>
+                    </label></p>
+                <p>
                     <input type="submit" value="Submit Uploads">
                     <input type="reset" value="Reset">
                 </p>
@@ -51,26 +49,26 @@
         <p>
             <label>
                 <b>Filter by:</b>
+                <select name="rating">
+                    <option value="">Choose Rating</option>
+                    <% ['★★★★★', '★★★★☆', '★★★☆☆', '★★☆☆☆', '★☆☆☆☆'].forEach((stars, ind) => { %>
+                        <% if (5-ind === filterRating) {%> 
+                            <option value="<%= 5-ind %>" selected="selected"><%= stars %></option> 
+                        <%} else {%>
+                            <option value="<%= 5-ind  %>"><%= stars %></option> 
+                        <% } %>
+                    <% }); %>
+                </select>
+                <select name="professor">
+                    <option value="">Choose Professor</option>
+                    <% professors.forEach((prof) => { %>
+                        <% if (prof === filterProf) {%> 
+                            <option selected="selected"><%= prof %></option> <%} else {%>
+                            <option><%= prof %></option> <% } %>
+                    <% }); %>
+                </select>
+                <input type="submit" value="Filter" id="searchbutton">
             </label>
-            <select name="rating">
-                <option value="">Choose Rating</option>
-                <% ['★★★★★', '★★★★☆', '★★★☆☆', '★★☆☆☆', '★☆☆☆☆'].forEach((stars, ind) => { %>
-                    <% if (5-ind === filterRating) {%> 
-                        <option value="<%= 5-ind %>" selected="selected"><%= stars %></option> 
-                    <%} else {%>
-                        <option value="<%= 5-ind  %>"><%= stars %></option> 
-                    <% } %>
-                <% }); %>
-            </select>
-            <select name="professor">
-                <option value="">Choose Professor</option>
-                <% professors.forEach((prof) => { %>
-                    <% if (prof === filterProf) {%> 
-                        <option selected="selected"><%= prof %></option> <%} else {%>
-                        <option><%= prof %></option> <% } %>
-                <% }); %>
-            </select>
-            <input type="submit" value="Filter" id="searchbutton">
         </p>
     </form>
     <br>
