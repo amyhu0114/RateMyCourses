@@ -48,7 +48,7 @@
     <form id="filter" method="GET" action="/course/<%= cid %>">
         <p>
             <label>
-                <b>Filter by:</b>
+                <label><b>Filter by:</b>
                 <select name="rating">
                     <option value="">Choose Rating</option>
                     <% ['★★★★★', '★★★★☆', '★★★☆☆', '★★☆☆☆', '★☆☆☆☆'].forEach((stars, ind) => { %>
@@ -68,6 +68,7 @@
                     <% }); %>
                 </select>
                 <input type="submit" value="Filter" id="searchbutton">
+                </label>
             </label>
         </p>
     </form>
