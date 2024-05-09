@@ -12,6 +12,9 @@
    <%- include("partials/navbar.ejs", {loggedIn: loggedIn}) %>
 
    <%- include("partials/flashes.ejs") %>
+   <% if(uploads.length === 0){%>
+      <p>No Syllabi for this course yet!</p>
+    <%}else{%>
    <div class="container">
     <% uploads.forEach( file => { %>
       <figure>
@@ -21,6 +24,7 @@
       </figure>
     <% }) %>
   </div>
+  <%}%>
 
 
 
