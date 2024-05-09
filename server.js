@@ -54,9 +54,10 @@ app.use(cookieSession({
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 
-// configure MUlter
 
+// Configure MUlter
 app.use('/uploads', express.static('uploads'));
+
 
 function timeString(dateObj) {
   if( !dateObj) {
@@ -107,12 +108,15 @@ var upload = multer(
 const ROUNDS = 15;
 
 // ================================================================
-// custom routes here
 
-const DTB = 'RateMyCourse';
-const WMDB = 'wmdb';
-const STAFF = 'staff';
+// Constant declaration
+const DBNAME = 'RateMyCourse';
+const USERS = 'users';
+const COURSES = 'courses'
+const REVIEWS = 'reviews'
+const COUNTERS = 'counters'
 const FILES = 'files';
+
 
 // main page. This shows the use of session cookies
 app.get('/', (req, res) => {
@@ -125,32 +129,31 @@ app.get('/', (req, res) => {
     return res.render('main.ejs', {loggedIn: loggedIn});
 });
 
-
+// =============== Beginning of Sofia Work ============================
 /**
- * Calculates the given number out of a 5-point scale represented with star symbols.
+ * Calculates the given number out of a 5-point scale represented with 
+ * star symbols.
  * @param {number} starNum 
  * @returns {string} star representation of given number
  */
 function makeStars(starNum) {
+  if (starNum === undefined) {
+    starNum = 0;
+  }
   starNum = Math.floor(starNum);
   return '★'.repeat(starNum) + '☆'.repeat(5-starNum);
 }
 
-// async function makeLikes() {
-//   const db = await Connection.open(mongoUri, DTB);
-//   const users = await db.collection('users').find().toArray();
-//   users.forEach(async user => {
-//     const userReviews = await db.collection('reviews').find({userId: user.userId}).toArray();
-//     const reviewIds = userReviews.map(rev => rev.reviewId);
-//     console.log(`$User #${user.userId} reviewed: ${reviewIds}`);
-//     await db.collection('users').updateOne({userId: user.userId}, {$set: {upvoted: [], downvoted: []}, $unset:{downvotes: 1}})
-//   })
-// }
-// makeLikes()
 
+/**
+ * Gets the average ratings for the given courseId aggregated by every review for
+ * that course.
+ * @param {number} courseId 
+ * @returns {Object} of all present ratings
+ */
 async function getAvgRatings(courseId) {
-  const db = await Connection.open(mongoUri, DTB);
-  const rating = await db.collection("reviews").aggregate(
+  const db = await Connection.open(mongoUri, DBNAME);
+  const ratings = await db.collection(REVIEWS).aggregate(
     [
       {$match: {courseId: courseId}}, 
       {$group: 
@@ -165,13 +168,13 @@ async function getAvgRatings(courseId) {
     ]
   ).toArray();
 
-  return rating.length == 0 ? 0 : rating[0];
+  return ratings.length == 0 ? {} : ratings[0];
 }
 
 /**
  * Takes review data from database, formats relevant data.
  * @param {Array} reviewData 
- * @returns {Array}
+ * @returns {Array} of reviews
  */
 async function formatReveiws(reviewData) {
   // Get relevant review data
@@ -183,10 +186,11 @@ async function formatReveiws(reviewData) {
     const overallNum = parseInt(reviewObj.overallRating);
     const cid = parseInt(reviewObj.courseId);
     const title = reviewObj.title;
-    const db = await Connection.open(mongoUri, DTB);
+    const db = await Connection.open(mongoUri, DBNAME);
 
     // Get course data
-    const courseList = await db.collection('courses').find({courseId: parseInt(cid)}).toArray();
+    const courseList = await db.collection(COURSES).find(
+      {courseId: parseInt(cid)}).toArray();
     const courseName = courseList[0].courseName;
 
     // Format course data
@@ -213,21 +217,22 @@ app.get('/course/:cid', async (req, res) => {
   // put in collection names as constants
   // clean up console.logs
   // make sure all functions have doc strings
+
   // finish limited upvoting
+
   // Make sure all reviews have title
-  // Fix course ratings bug
   // read Scott's feedback
   // Update README
 
   // Set relevant variables
   const cid = req.params.cid;
-  const db = await Connection.open(mongoUri, DTB);
+  const db = await Connection.open(mongoUri, DBNAME);
   const filterRating = parseInt(req.query.rating);
   const filterProf = req.query.professor;
   console.log(filterRating, filterProf)
 
   // Get course data
-  const courseList = await db.collection('courses').find({courseId: parseInt(cid)}).toArray();
+  const courseList = await db.collection(COURSES).find({courseId: parseInt(cid)}).toArray();
   if (courseList.length === 0) {
     req.flash('error', `Course with courseId ${cid} not found!`);
     return res.redirect("/");
@@ -242,7 +247,7 @@ app.get('/course/:cid', async (req, res) => {
   }
   const departmentName = deptList[0].departmentName;
 
-  // Get review data
+  // Create review query based on filters
   const query = {courseId: parseInt(cid)};
   if (!isNaN(filterRating)) {
     query['overallRating'] = filterRating;
@@ -250,16 +255,15 @@ app.get('/course/:cid', async (req, res) => {
   if (filterProf !== "" && filterProf !== undefined) {
     query['professor'] = filterProf;
   }
-  console.log("query", query)
+  console.log("query", query);
 
-  const reviewData = await db.collection('reviews').find(query).toArray();
+  // Get review data
+  const reviewData = await db.collection(REVIEWS).find(query).toArray();
   const reviewList = await formatReveiws(reviewData);
 
   // Get average ratings data
-  let ratings = {accessibility: 0, content: 0, overall: 0, workload: 0}
-  if (reviewList.length !== 0) {
-    ratings = await getAvgRatings(parseInt(cid));
-  }
+  const ratings = await getAvgRatings(parseInt(cid));
+  console.log("ratings", ratings);
 
   // Get session data
   const loggedIn = (req.session.loggedIn) || false;
@@ -273,10 +277,10 @@ app.get('/course/:cid', async (req, res) => {
         accessibilityStars: makeStars(ratings.accessibility),
         workloadStars: makeStars(ratings.workload), 
         contentStars: makeStars(ratings.content),
-        overallNum: ratings.overall.toFixed(2),
-        accessibilityNum: ratings.accessibility.toFixed(2),
-        workloadNum: ratings.workload.toFixed(2),
-        contentNum: ratings.content.toFixed(2),
+        overallNum: ratings.overall === undefined ? null : ratings.overall.toFixed(2),
+        accessibilityNum: ratings.accessibility === undefined ? null : ratings.accessibility.toFixed(2),
+        workloadNum: ratings.workload === undefined ? null : ratings.workload.toFixed(2),
+        contentNum: ratings.content === undefined ? null : ratings.content.toFixed(2),
         reviewList: reviewList,
         loggedIn: loggedIn,
         filterProf: filterProf,
@@ -292,13 +296,13 @@ app.post('/increment-votes/', async (req, res) => {
   const button = req.body.button;
   const uid = req.session.userId;
   console.log("uid", uid)
-  const db = await Connection.open(mongoUri, DTB);
+  const db = await Connection.open(mongoUri, DBNAME);
   console.log()
   console.log("rid", rid)
 
   let errorMessage = "";
   if (req.session.loggedIn) {
-    const user = await db.collection('users').find({userId: uid}).toArray();
+    const user = await db.collection(USERS).find({userId: uid}).toArray();
     let upInc = 0;
     let downInc = 0;
     const upvoted = user[0].upvoted;
@@ -339,15 +343,15 @@ app.post('/increment-votes/', async (req, res) => {
     // } 
   
     // Update voting numbers
-    await db.collection("reviews").updateOne({reviewId: rid}, 
+    await db.collection(REVIEWS).updateOne({reviewId: rid}, 
       {$inc: {upvotes: upInc, downvotes: downInc}});  
     
     console.log(upvoted, downvoted)
     // Update voting lists
-    await db.collection("users").updateOne({userId: uid}, 
+    await db.collection(USERS).updateOne({userId: uid}, 
       {$set: {upvoted: upvoted, downvoted: downvoted}});  
     
-    const c1 = await db.collection("users").find({userId: uid}).toArray();
+    const c1 = await db.collection(USERS).find({userId: uid}).toArray();
     // console.log(c1)
 
 
@@ -356,16 +360,14 @@ app.post('/increment-votes/', async (req, res) => {
   }
 
   // Get & return new total votes
-  const review = await db.collection("reviews").findOne({reviewId: rid});
+  const review = await db.collection(REVIEWS).findOne({reviewId: rid});
   return res.json({totalVotes: review.upvotes-review.downvotes, 
                   errorMessage: errorMessage});
   
 });
+// =============== End of Sofia Work ==================================
 
-
-// ===============Beginning of Amy Work ============================
-const DBNAME = "RateMyCourse";
-const USERS = "users";
+// =============== Beginning of Amy Work ============================
 // POST Handler to enable signup
 app.post("/join", async (req, res) => {
     try {
@@ -384,7 +386,7 @@ app.post("/join", async (req, res) => {
       // given that the username does not exist, hash the password and add the user 
       // (userID, userName, hashed passwrod) to the user database
       const hash = await bcrypt.hash(password, ROUNDS);
-      const counterCol = db.collection('counters');
+      const counterCol = db.collection(COUNTERS);
       // use the counter module to generate the next userID
       var uID = await counter.incrCounter(counterCol, USERS);
       await db.collection(USERS).insertOne({
@@ -475,8 +477,8 @@ app.post("/join", async (req, res) => {
     // Get review data given the logged in user from the database
     var userId = req.session.userId;
     var username = req.session.username;
-    const db = await Connection.open(mongoUri, DTB);
-    const reviewData = await db.collection('reviews').find({userId: parseInt(userId)}).toArray();
+    const db = await Connection.open(mongoUri, DBNAME);
+    const reviewData = await db.collection(REVIEWS).find({userId: parseInt(userId)}).toArray();
     const reviewList = await formatReveiws(reviewData);
     
     // Get session data
@@ -488,8 +490,8 @@ app.post("/join", async (req, res) => {
   app.post('/remove-review/',requiresLogin, async (req, res) => {
         let cID = parseInt(req.body.cID);
         var userId = req.session.userId;
-        const db = await Connection.open(mongoUri, DTB);
-        let result = await db.collection("reviews").deleteOne({courseId:cID, userId: userId});
+        const db = await Connection.open(mongoUri, DBNAME);
+        let result = await db.collection(REVIEWS).deleteOne({courseId:cID, userId: userId});
         console.log(result);
     });
 // ===============End of Amy Work ==================================
@@ -501,10 +503,10 @@ app.post("/join", async (req, res) => {
   Helper function for the Post handler of the /review/ page
 */
 async function insertReview(db, courseId, difficulty, workload, text, userId, rating, accessibility, professor, title){
-  const counterCol = await db.collection('counters');
-  const newId = await counter.incrCounter(counterCol, 'reviews');
+  const counterCol = await db.collection(COUNTERS);
+  const newId = await counter.incrCounter(counterCol, REVIEWS);
   console.log(newId);
-  let result = db.collection("reviews").insertOne({courseId: parseInt(courseId), contentDifficulty: parseInt(difficulty), 
+  let result = db.collection(REVIEWS).insertOne({courseId: parseInt(courseId), contentDifficulty: parseInt(difficulty), 
     workloadRating: parseInt(workload), reviewText: text, userId: parseInt(userId), overallRating: parseInt(rating), 
     accessibilityRating: parseInt(accessibility), professor: professor, upvotes: 0, downvotes: 0, reviewId: newId, title: title});
   return result;
@@ -521,7 +523,7 @@ app.get('/review/', requiresLogin, async (req, res) => {
   }
   const db = await Connection.open(mongoUri, DBNAME);
   //finds courses to feed into rendering of makeReview.ejs page
-  var courses = await db.collection("courses").find({}).toArray();
+  var courses = await db.collection(COURSES).find({}).toArray();
   var professors = {};
   courses.forEach(course => professors[course.courseId]=course.professorNames)
   console.log(professors);
@@ -551,7 +553,7 @@ app.post("/review/", async (req, res) => {
     if (professor == 'other' || professor == null){
       var newProf = req.body.newProf;
       await insertReview(db, course_id, difficulty, workload, text, userId, rating, accessibility, newProf, title);
-      await db.collection("courses").updateOne({courseId: parseInt(course_id)}, {$push: {professorNames: newProf}});
+      await db.collection(COURSES).updateOne({courseId: parseInt(course_id)}, {$push: {professorNames: newProf}});
       //do something to add to course
     }
     else{
@@ -598,9 +600,9 @@ app.get('/upload/:cid', async (req, res) => {
   returns a promise to update the database
 */
 async function insertCourse(db, course_name, course_code, department_id, professor_list){
-  const counterCol = await db.collection('counters');
-  const course_id = await counter.incrCounter(counterCol, 'courses');
-  let result = db.collection("courses").insertOne({courseId: parseInt(course_id), courseName: course_name, 
+  const counterCol = await db.collection(COUNTERS);
+  const course_id = await counter.incrCounter(counterCol, COURSES);
+  let result = db.collection(COURSES).insertOne({courseId: parseInt(course_id), courseName: course_name, 
     courseCode: course_code, departmentId: parseInt(department_id), professorNames: professor_list});
   return result;
 }
@@ -674,7 +676,7 @@ app.get('/search/', async (req, res) => {
   console.log("Depts list: ", listOfDepts);
   
   //search database for term
-  let searchResults = await db.collection("courses").find({courseCode: {$regex: customRegex}}).project({_id: 0, courseCode: 1, courseId: 1}).toArray();
+  let searchResults = await db.collection(COURSES).find({courseCode: {$regex: customRegex}}).project({_id: 0, courseCode: 1, courseId: 1}).toArray();
   console.log(searchResults);
   console.log("successfully queried database");
 
@@ -734,7 +736,7 @@ app.get('/browse/', async (req, res) => {
 
   const loggedIn = (req.session.loggedIn) || false;
 
-  let searchResults = await db.collection("courses").find({departmentId: deptIdInt}).toArray();
+  let searchResults = await db.collection(COURSES).find({departmentId: deptIdInt}).toArray();
 
   let listOfDepts = await db.collection("departments").find().toArray();
   //now we have our list of search results

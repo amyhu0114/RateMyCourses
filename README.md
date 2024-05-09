@@ -63,7 +63,10 @@ If you want to submit a review, you must log in, or sign up using any username a
         - This should delete the review
 9. Click on Home in the navbar to go back to home page [Amy]
 10. Search for the course that you’ve deleted your review from using search bar and this time you should see your review disappear [Amy]
-11. Click on Logout on the Navbar [Amy]
+11. Return to Make a Review, and click Make a course
+    - There, make a course
+    - Then, return to the Make a Review page, and check that the course is there (you may have to shift+reload)
+12. Click on Logout on the Navbar [Amy]
     - This time, clicking on Make a Review should flash that you’re not logged in
 
 
