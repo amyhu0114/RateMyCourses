@@ -591,6 +591,7 @@ app.post('/upload/:cid', upload.single('photo'), async (req, res) => {
 app.get('/upload/:cid', async (req, res) => {
   const db = await Connection.open(mongoUri, DBNAME);
   let course_id = req.params.cid;
+  //finding files with the right courseId
   let files = await db.collection(FILES).find({courseId: course_id}).toArray();
   const loggedIn = (req.session.loggedIn) || false;
   return res.render('uploadSyllabus.ejs', {uploads: files, loggedIn: loggedIn});
