@@ -21,25 +21,31 @@
             <p><b>Content Difficulty</b> <%= contentStars %> <%= contentNum %> </p>
             <p><b>Workload</b> <%= workloadStars %> <%= workloadNum %> </p>
         </div>
-    <% if(loggedIn){ %>
     <div class = right>
-        <form action="/upload/:<%= cid %>" method="POST" enctype="multipart/form-data">
-            <p> Input Syllabus: </p>
-            <p></p>
-                <label for="title">title
-                    <input type="text" name="title" placeholder="photo title">
-                </label>
-            </p><p>
-                <label>file
-                    <input type="file" accept=".pdf" name="photo" >
-                </label>
-            </p><p>
-                <input type="submit" value="Submit Uploads">
-                <input type="reset" value="Reset">
-            </p>
+        <form
+        id="new course"
+        method="GET"
+        action="/upload/<%= cid %>" >
+           <button type="submit">View Syllabi</button>
         </form>
+        <% if(loggedIn){ %>
+            <form action="/upload/<%= cid %>" method="POST" enctype="multipart/form-data">
+                <p> Input Syllabus: </p>
+                <p></p>
+                    <label for="title">title
+                        <input type="text" name="title" placeholder="photo title">
+                    </label>
+                </p><p>
+                    <label>file
+                        <input type="file" accept=".pdf" name="photo" >
+                    </label>
+                </p><p>
+                    <input type="submit" value="Submit Uploads">
+                    <input type="reset" value="Reset">
+                </p>
+            </form>
+        <%}%>
     </div>
-    <%}%>
     </div>
     <form id="filter" method="GET" action="/course/<%= cid %>">
         <p>

@@ -503,9 +503,10 @@ app.post('/upload/:cid', upload.single('photo'), async (req, res) => {
   return res.redirect('/');
 });
 
-app.get('/uploads/', async (req, res) => {
+app.get('/upload/:cid', async (req, res) => {
   const db = await Connection.open(mongoUri, DBNAME);
-  let files = await db.collection(FILES).find({}).toArray();
+  let course_id = req.params.cid;
+  let files = await db.collection(FILES).find({courseId: course_id}).toArray();
   return res.render('uploadSyllabus.ejs', {uploads: files});
 });
 
