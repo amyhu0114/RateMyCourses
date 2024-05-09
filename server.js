@@ -187,15 +187,13 @@ async function formatReveiws(reviewData) {
 }
 
 app.get('/course/:cid', async (req, res) => {
-  // START HERE FOR DOC: 
-  // clean up console.logs
-  // make sure all functions have doc strings
-
   // finish limited upvoting
 
-  // Make sure all reviews have title
   // read Scott's feedback
   // Update README
+
+  
+
 
   // Set relevant variables
   const cid = req.params.cid;
@@ -273,57 +271,65 @@ app.post('/increment-votes/', async (req, res) => {
   const rid = parseInt(req.body.rid);
   const button = req.body.button;
   const uid = req.session.userId;
-  console.log("uid", uid)
+  
   const db = await Connection.open(mongoUri, DBNAME);
   console.log()
   console.log("rid", rid)
+  console.log("uid", uid)
 
   let errorMessage = "";
-  if (req.session.loggedIn) {
+  if (req.session.loggedIn) { // ensure user is logged in
     const user = await db.collection(USERS).find({userId: uid}).toArray();
     let upInc = 0;
     let downInc = 0;
     const upvoted = user[0].upvoted;
     const downvoted = user[0].downvoted;
-    console.log(upvoted, downvoted)
+    console.log("Voting lists:", upvoted, downvoted)
+    console.log("Button", button)
 
-    if (upvoted.includes(rid)) {
-      if (button === 'up') {
-        errorMessage = "You already upvoted here!"
-        console.log('already up');
-      } 
-      // else {
-      //   // remove rid from upvotes, add it to downvoted, -1 review upvote num
-      //   upvoted.push(rid)
-      //   downvoted.pop(rid)
-      //   upInc = -1;
-      //   console.log('');
-      // }
-    } else {
-      if (button === 'up') {
-        // add to upvoted, upvotes+1
-        console.log('new upvote')
+    // Case handling for limited voting
+    if (button === 'up') {
+      if (upvoted.includes(rid)) {
+        errorMessage = "You already upvoted here! Undoing it!"
+        console.log('undo up');
+        upInc = -1;
+        upvoted.pop(rid)
+      } else if (downvoted.includes(rid)) {
+        console.log('reverse down, go up')
+        downInc = -1;
         upInc = 1;
-        upvoted.push(rid);
+        downvoted.pop(rid)
+        upvoted.push(rid)
       } else {
-        // add to downvotes, upvotes+1
-        downInc = 1;
-        downvoted.push(rid);
+        console.log('new up');
+        upInc = 1;
+        upvoted.push(rid)
       }
+    } else if (button === 'down'){
+      if (upvoted.includes(rid)) {
+        console.log('reverse up, go down')
+        upInc = -1;
+        downInc = 1;
+        upvoted.pop(rid);
+        downvoted.push(rid);
+      } else if (downvoted.includes(rid)) {
+        errorMessage = "You already downvoted here! Undoing it!"
+        console.log('undo down');
+        downInc = -1;
+        downvoted.pop(rid)
+      } else {
+        console.log('new down');
+        downInc = 1;
+        downvoted.push(rid)
+      }
+    } else {
+      console.log('How did you get here? (/increment-votes/)');
     }
 
-    // else if (!downvotes.contains(rid)) {
-    //   if (button === 'down') {
-    //     errorMessage = "You already downvoted here, hater!"
-    //   } else {
-    //     // remove rid from downvotes, add it to upvoted, -1 review downvote num
-    //   }
-    // } 
-  
     // Update review voting numbers
     await db.collection(REVIEWS).updateOne({reviewId: rid}, 
       {$inc: {upvotes: upInc, downvotes: downInc}});  
-    console.log(upvoted, downvoted)
+    console.log("Updated numbers:", upvoted, downvoted)
 
     // Update user voting lists
     await db.collection(USERS).updateOne({userId: uid}, 
@@ -759,7 +765,7 @@ app.get('/browse/', async (req, res) => {
     console.log("Search results identified");
     let searchStrings = [];
     searchResults.forEach(((elt) => searchStrings.push(searchLinkGenerator(elt))));
-    
+
     return res.render("searchResult.ejs", {searchResults: searchStrings, 
                                           loggedIn: loggedIn,
                                           formData: blank, depts: listOfDepts})
