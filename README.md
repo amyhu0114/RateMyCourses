@@ -22,7 +22,7 @@ RateMyCourse has all course features working! Authentication is working (registr
 ## Directions for use
 If you want to submit a review, you must log in, or sign up using any username and any password. You can then click the “Make Review” button to submit. To access any course page you must search in the search bar any element of a course code, either/or the letters and the numbers or both. 
 
-## Testing Procedure:
+### Testing Procedure:
 1. On Home page, click on the “browse all courses” button [Nico]
     - That should send you to a search results page listing all current courses that have reviews in the database
 2. Choose a department in the “filter by department” dropdown, and then press “filter” [Nico]
