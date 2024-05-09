@@ -21,6 +21,7 @@
             <p><b>Content Difficulty</b> <%= contentStars %> <%= contentNum %> </p>
             <p><b>Workload</b> <%= workloadStars %> <%= workloadNum %> </p>
         </div>
+    <% if(loggedIn){ %>
     <div class = right>
         <form action="/upload/:<%= cid %>" method="POST" enctype="multipart/form-data">
             <p> Input Syllabus: </p>
@@ -38,6 +39,7 @@
             </p>
         </form>
     </div>
+    <%}%>
     </div>
     <form id="filter" method="GET" action="/course/<%= cid %>">
         <p>
