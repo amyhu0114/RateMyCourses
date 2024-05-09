@@ -385,7 +385,9 @@ app.post("/join", async (req, res) => {
       await db.collection(USERS).insertOne({
           userId: uID,
           userName: username,
-          hash: hash
+          hash: hash,
+          upvoted: [],
+          downvoted: []
       });
       console.log('successfully joined', username, password, hash);
       req.flash('info', 'successfully joined and logged in as ' + username);
