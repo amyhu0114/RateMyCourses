@@ -17,46 +17,54 @@
 <form id="review"
       method="POST"
       action="/review/">
-     <label>Course: </label> 
+     <label>Course:
      <select name="courseIdReview" required>
       <option value="" disabled selected>Choose one</option>
       <!-- making an option for each course in the list-->
       <% courses.forEach( course => {%>
           <option value = "<%=course.courseId%>" > <%=course.courseCode%>: <%=course.courseName%> </option>
       <% }) %>
-    </select><br><br>
+    </select></label><br><br>
         <label>Professor: 
         <select name ="Professor" required>
         </select></label><br><br>
     <div id = "professorSel" /*style = "display: none"*/>
     </div>
     <p>Workload Rating: 
+    <fieldset>
     <label>1<input type="radio" name = "workloadRating"  value = 1></label>
     <label>2<input type="radio" name = "workloadRating" value = 2></label>
     <label>3<input type="radio" name = "workloadRating" value = 3 required></label>
     <label>4<input type="radio" name = "workloadRating" value = 4></label>
     <label>5<input type="radio" name = "workloadRating" value = 5></label>
+</fieldset>
     </p>
+<fieldset>
      <p>Content Difficulty Rating:  
      <label>1<input type="radio" name = "contentDifficulty" value = 1></label>
     <label>2<input type="radio" name = "contentDifficulty" value = 2></label>
     <label>3<input type="radio" name = "contentDifficulty" value = 3 required></label>
     <label>4<input type="radio" name = "contentDifficulty" value = 4></label>
     <label>5<input type="radio" name = "contentDifficulty" value = 5></label>
+</fieldset>
     </p>
+<fieldset>
     <p>Accessibility Rating:  
     <label>1<input type="radio" name = "accessibility" value = 1></label>
     <label>2<input type="radio" name = "accessibility" value = 2></label>
     <label>3<input type="radio" name = "accessibility" value = 3 required></label>
     <label>4<input type="radio" name = "accessibility" value = 4></label>
     <label>5<input type="radio" name = "accessibility" value = 5></label>
+</fieldset>
     </p>
+<fieldset>
     <p>Overall Rating:     
     <label>1<input type="radio" name = "rating" value = 1></label>
     <label>2<input type="radio" name = "rating" value = 2></label>
     <label>3<input type="radio" name = "rating" value = 3 required></label>
     <label>4<input type="radio" name = "rating" value = 4></label>
     <label>5<input type="radio" name = "rating" value = 5></label>
+</fieldset>
     </p>
     <br>
     <label>Review Title:  
