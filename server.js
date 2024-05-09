@@ -516,7 +516,8 @@ app.get('/upload/:cid', async (req, res) => {
   const db = await Connection.open(mongoUri, DBNAME);
   let course_id = req.params.cid;
   let files = await db.collection(FILES).find({courseId: course_id}).toArray();
-  return res.render('uploadSyllabus.ejs', {uploads: files});
+  const loggedIn = (req.session.loggedIn) || false;
+  return res.render('uploadSyllabus.ejs', {uploads: files, loggedIn: loggedIn});
 });
 
 /* funtion to insert courses, helper function for the /inputCourse/ POST handler
