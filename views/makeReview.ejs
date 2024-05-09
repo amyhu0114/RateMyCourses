@@ -26,46 +26,46 @@
       <% }) %>
     </select></label><br><br>
         <label>Professor: 
-        <select name ="Professor" required>
+        <select name ="Professor">
         </select></label><br><br>
-    <div id = "professorSel" /*style = "display: none"*/>
-    </div>
-    <p>Workload Rating: 
+    <div id = "professorSel">
+    </div> 
     <fieldset>
+        <legend for = "workloadRating">Choose a Workload Rating:</legend>
     <label>1<input type="radio" name = "workloadRating"  value = 1></label>
     <label>2<input type="radio" name = "workloadRating" value = 2></label>
     <label>3<input type="radio" name = "workloadRating" value = 3 required></label>
     <label>4<input type="radio" name = "workloadRating" value = 4></label>
     <label>5<input type="radio" name = "workloadRating" value = 5></label>
 </fieldset>
-    </p>
+
 <fieldset>
-     <p>Content Difficulty Rating:  
+    <legend for = "contentDifficulty">Choose a Content Difficulty Rating:</legend> 
      <label>1<input type="radio" name = "contentDifficulty" value = 1></label>
     <label>2<input type="radio" name = "contentDifficulty" value = 2></label>
     <label>3<input type="radio" name = "contentDifficulty" value = 3 required></label>
     <label>4<input type="radio" name = "contentDifficulty" value = 4></label>
     <label>5<input type="radio" name = "contentDifficulty" value = 5></label>
 </fieldset>
-    </p>
+
 <fieldset>
-    <p>Accessibility Rating:  
+    <legend for = "accessibility">Choose an Accessibility Rating:</legend>
     <label>1<input type="radio" name = "accessibility" value = 1></label>
     <label>2<input type="radio" name = "accessibility" value = 2></label>
     <label>3<input type="radio" name = "accessibility" value = 3 required></label>
     <label>4<input type="radio" name = "accessibility" value = 4></label>
     <label>5<input type="radio" name = "accessibility" value = 5></label>
 </fieldset>
-    </p>
+
 <fieldset>
-    <p>Overall Rating:     
+    <legend for = "rating">Choose an Overall Rating:</legend>     
     <label>1<input type="radio" name = "rating" value = 1></label>
     <label>2<input type="radio" name = "rating" value = 2></label>
     <label>3<input type="radio" name = "rating" value = 3 required></label>
     <label>4<input type="radio" name = "rating" value = 4></label>
     <label>5<input type="radio" name = "rating" value = 5></label>
 </fieldset>
-    </p>
+
     <br>
     <label>Review Title:  
         <input placeholder="Good Class!" name="reviewTitle" required></label><br><br>
@@ -89,7 +89,7 @@ action="/inputCourse/" >
         $('#professorSel').empty()
         if(profs[selectedID].length==0){
             $('#professorSel').append(
-                "<label>New Professor <input type = textarea name = 'newProf'></input></label> "
+                "<label>New Professor <input type = textarea name = 'newProf' required></input></label> "
             );
         }else{
         $('[name=Professor]').append(profs[selectedID].map(
@@ -99,6 +99,7 @@ action="/inputCourse/" >
         $('[name="Professor"]').append(
             "<option id = 'other' value = 'other'>other</option>"
         )
+        $('[name="Professor"]').attr("required",true);
         }
     }
     function loadInputText(){
