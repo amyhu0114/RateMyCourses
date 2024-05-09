@@ -48,7 +48,7 @@
     <form id="filter" method="GET" action="/course/<%= cid %>">
         <p>
             <label>
-                <label><b>Filter by:</b>
+                <label><b>Filter by Rating:</b>
                 <select name="rating">
                     <option value="">Choose Rating</option>
                     <% ['★★★★★', '★★★★☆', '★★★☆☆', '★★☆☆☆', '★☆☆☆☆'].forEach((stars, ind) => { %>
@@ -59,6 +59,8 @@
                         <% } %>
                     <% }); %>
                 </select>
+                </label>
+                <label><b>Filter by Professor:</b>
                 <select name="professor">
                     <option value="">Choose Professor</option>
                     <% professors.forEach((prof) => { %>
@@ -67,8 +69,9 @@
                             <option><%= prof %></option> <% } %>
                     <% }); %>
                 </select>
-                <input type="submit" value="Filter" id="searchbutton">
                 </label>
+                <input type="submit" value="Filter" id="searchbutton">
+                
             </label>
         </p>
     </form>
@@ -79,7 +82,7 @@
             No results for this search! <% } else { %>
             <% reviewList.forEach((rev) => {  %>
                 <div class="courseCard" id=<%= rev.id %>>
-                    <h2 class="reviewTitle"><%= rev.title%></h2>
+                    <% if (rev.title != "") {%> <h2 class="reviewTitle"><%= rev.title%></h2> <% }%>
                     <% if (rev.professor != null) { %>
                         <p>Professor: <%= rev.professor %></p>
                     <% }%>

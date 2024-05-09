@@ -213,6 +213,11 @@ app.get('/course/:cid', async (req, res) => {
   // put in collection names as constants
   // clean up console.logs
   // make sure all functions have doc strings
+  // finish limited upvoting
+  // Make sure all reviews have title
+  // Fix course ratings bug
+  // read Scott's feedback
+  // Update README
 
   // Set relevant variables
   const cid = req.params.cid;
@@ -385,9 +390,7 @@ app.post("/join", async (req, res) => {
       await db.collection(USERS).insertOne({
           userId: uID,
           userName: username,
-          hash: hash,
-          upvoted: [],
-          downvoted: []
+          hash: hash
       });
       console.log('successfully joined', username, password, hash);
       req.flash('info', 'successfully joined and logged in as ' + username);
