@@ -19,6 +19,9 @@ RateMyCourse lets Wellesley students rate their courses and view course ratings 
 ## Status of the project
 RateMyCourse has all course features working! Authentication is working (registration, logging in, session, and logout), and when logged in, a user can submit a review, add a course or new professor, upvote/downvote on reviews, upload syllabi, and view and delete their own reviews. All users can view course pages and their reviews and search for courses.
 
+### Future Work
+- Pre-filling the course for Make a Review page when coming from a course page
+
 ## Directions for use
 If you want to submit a review, you must log in, or sign up using any username and any password. You can then click the “Make Review” button to submit. To access any course page you must search in the search bar any element of a course code, either/or the letters and the numbers or both. 
 
