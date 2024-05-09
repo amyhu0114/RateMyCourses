@@ -196,6 +196,12 @@ async function formatReveiws(reviewData) {
 }
 
 app.get('/course/:cid', async (req, res) => {
+  // START HERE FOR DOC: 
+  // clean up constants
+  // put in collection names as constants
+  // clean up console.logs
+  // make sure all functions have doc strings
+
   // Set relevant variables
   const cid = req.params.cid;
   const db = await Connection.open(mongoUri, DTB);
@@ -234,7 +240,10 @@ app.get('/course/:cid', async (req, res) => {
   const reviewList = await formatReveiws(reviewData);
 
   // Get average ratings data
-  const ratings = await getAvgRatings(parseInt(cid));
+  let ratings = {accessibility: 0, content: 0, overall: 0, workload: 0}
+  if (reviewList.length !== 0) {
+    ratings = await getAvgRatings(parseInt(cid));
+  }
 
   // Get session data
   const loggedIn = (req.session.loggedIn) || false;

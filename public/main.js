@@ -53,67 +53,37 @@ $("#allReviews")
             $(cC).remove();
         });
 
-// // Upvotes increment function
-// async function incVotes(reviewId, upInc, downInc){
-//     await $.post('/increment-votes/', {rid: reviewId, upInc: upInc, downInc: downInc}, function(data){
-//         console.log("DATA", data);
-//       });
-//     console.log("nt2", nt2);
-// }
-
-
+/**
+ * In the given reviewId, increments the upvotes by upInc and the downvotes by downInc, 
+ * then updates the text of the given element to the most recent total votes
+ * (upvotes-downvotes) number.
+ * @param {number} reviewId 
+ * @param {number} upInc 
+ * @param {number} downInc 
+ * @param {Element} votesElement 
+ */
 function incVotes(reviewId, upInc, downInc, votesElement){
-    console.log("here1")
     $.post('/increment-votes/', {rid: reviewId, upInc: upInc, downInc: downInc}, function(data){
         votesElement.text(data.totalVotes)
     });
 }
 
-
-
 // Upvotes event handler
 $(".courseCard").one().on('click', 'button', (event) => {
+    // Get relevant elements
     const reviewCard = $(event.target).closest('.courseCard');
     const voteNum = reviewCard.find('p[data-role=voteNum]');
     const revId = reviewCard.attr('id');
 
-    const totalVotes = parseInt(voteNum.text());
-
+    // Increment votes
     const btnType = event.target.getAttribute('data-role');
     if (btnType === 'downBtn') {
         console.log("DOWN");
         incVotes(revId, 0, 1, voteNum);
-        // console.log("newVotes", newVotes)
-        // voteNum.text(totalVotes-1);
     } else {
         console.log("UP");
-        // const newVotes = incVotes(revId, 1, 0);
         incVotes(revId, 1, 0, voteNum);
-
-        // voteNum.text(totalVotes+1);
     }
 })
 
-/**
- * Calculates the given number out of a 5-point scale represented with star symbols.
- * @param {number} starNum 
- * @returns {string} star representation of given number
- */
-function makeStars(starNum) {
-    starNum = Math.floor(starNum);
-    return '★'.repeat(starNum) + '☆'.repeat(5-starNum);
-  }
-
 console.log('main.js loaded');
-
-
-/*
-function loadProfessors(){
-    $.get("/test/"+123, {}).then(processAction)
-
-
-}
-
-$('[name="courseIdReview"]').change(loadProfessors)
-*/
-
