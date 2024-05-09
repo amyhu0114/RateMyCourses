@@ -62,9 +62,11 @@ $("#allReviews")
  * @param {number} downInc 
  * @param {Element} votesElement 
  */
-function incVotes(reviewId, upInc, downInc, votesElement){
-    $.post('/increment-votes/', {rid: reviewId, upInc: upInc, downInc: downInc}, function(data){
-        votesElement.text(data.totalVotes)
+function incVotes(reviewId, buttonType, votesElement, errorSpan){
+    $.post('/increment-votes/', {rid: reviewId, button: buttonType}, function(data){
+        votesElement.text(data.totalVotes);
+        console.log(data.errorMessage)
+        errorSpan.text(data.errorMessage);
     });
 }
 
@@ -73,16 +75,17 @@ $(".courseCard").one().on('click', 'button', (event) => {
     // Get relevant elements
     const reviewCard = $(event.target).closest('.courseCard');
     const voteNum = reviewCard.find('p[data-role=voteNum]');
+    const errorSpan = reviewCard.find('span[data-role=errorMessage]');
     const revId = reviewCard.attr('id');
 
     // Increment votes
     const btnType = event.target.getAttribute('data-role');
     if (btnType === 'downBtn') {
         console.log("DOWN");
-        incVotes(revId, 0, 1, voteNum);
+        incVotes(revId, 'down', voteNum, errorSpan);
     } else {
         console.log("UP");
-        incVotes(revId, 1, 0, voteNum);
+        incVotes(revId, 'up', voteNum, errorSpan);
     }
 })
 

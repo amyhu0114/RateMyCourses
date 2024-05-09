@@ -136,6 +136,18 @@ function makeStars(starNum) {
   return '★'.repeat(starNum) + '☆'.repeat(5-starNum);
 }
 
+// async function makeLikes() {
+//   const db = await Connection.open(mongoUri, DTB);
+//   const users = await db.collection('users').find().toArray();
+//   users.forEach(async user => {
+//     const userReviews = await db.collection('reviews').find({userId: user.userId}).toArray();
+//     const reviewIds = userReviews.map(rev => rev.reviewId);
+//     console.log(`$User #${user.userId} reviewed: ${reviewIds}`);
+//     await db.collection('users').updateOne({userId: user.userId}, {$set: {upvoted: [], downvoted: []}, $unset:{downvotes: 1}})
+//   })
+// }
+// makeLikes()
+
 async function getAvgRatings(courseId) {
   const db = await Connection.open(mongoUri, DTB);
   const rating = await db.collection("reviews").aggregate(
@@ -233,7 +245,6 @@ app.get('/course/:cid', async (req, res) => {
   if (filterProf !== "" && filterProf !== undefined) {
     query['professor'] = filterProf;
   }
-
   console.log("query", query)
 
   const reviewData = await db.collection('reviews').find(query).toArray();
@@ -247,8 +258,6 @@ app.get('/course/:cid', async (req, res) => {
 
   // Get session data
   const loggedIn = (req.session.loggedIn) || false;
-
-  
 
   return res.render("course.ejs", {
         cid: courseData.courseId,
@@ -275,17 +284,76 @@ app.get('/course/:cid', async (req, res) => {
 app.post('/increment-votes/', async (req, res) => {  
   // Set relevant variables
   const rid = parseInt(req.body.rid);
-  const upInc = parseInt(req.body.upInc);
-  const downInc = parseInt(req.body.downInc);
-
-  // Update database with new upvote/downvotes
+  const button = req.body.button;
+  const uid = req.session.userId;
+  console.log("uid", uid)
   const db = await Connection.open(mongoUri, DTB);
-  await db.collection("reviews").updateOne({reviewId: rid}, 
-    {$inc: {upvotes: upInc, downvotes: downInc}});
+  console.log()
+  console.log("rid", rid)
+
+  let errorMessage = "";
+  if (req.session.loggedIn) {
+    const user = await db.collection('users').find({userId: uid}).toArray();
+    let upInc = 0;
+    let downInc = 0;
+    const upvoted = user[0].upvoted;
+    const downvoted = user[0].downvoted;
+    console.log(upvoted, downvoted)
+
+    if (upvoted.includes(rid)) {
+      if (button === 'up') {
+        errorMessage = "You already upvoted here!"
+        console.log('already up');
+      } 
+      // else {
+      //   // remove rid from upvotes, add it to downvoted, -1 review upvote num
+      //   upvoted.push(rid)
+      //   downvoted.pop(rid)
+      //   upInc = -1;
+      //   console.log('');
+      // }
+    } else {
+      if (button === 'up') {
+        // add to upvoted, upvotes+1
+        console.log('new upvote')
+        upInc = 1;
+        upvoted.push(rid);
+      } else {
+        // add to downvotes, upvotes+1
+        downInc = 1;
+        downvoted.push(rid);
+      }
+    }
+
+    // else if (!downvotes.contains(rid)) {
+    //   if (button === 'down') {
+    //     errorMessage = "You already downvoted here, hater!"
+    //   } else {
+    //     // remove rid from downvotes, add it to upvoted, -1 review downvote num
+    //   }
+    // } 
+  
+    // Update voting numbers
+    await db.collection("reviews").updateOne({reviewId: rid}, 
+      {$inc: {upvotes: upInc, downvotes: downInc}});  
+    
+    console.log(upvoted, downvoted)
+    // Update voting lists
+    await db.collection("users").updateOne({userId: uid}, 
+      {$set: {upvoted: upvoted, downvoted: downvoted}});  
+    
+    const c1 = await db.collection("users").find({userId: uid}).toArray();
+    // console.log(c1)
+
+
+  } else {
+    errorMessage = "Please log in to vote!";
+  }
 
   // Get & return new total votes
   const review = await db.collection("reviews").findOne({reviewId: rid});
-  return res.json({totalVotes: review.upvotes-review.downvotes});
+  return res.json({totalVotes: review.upvotes-review.downvotes, 
+                  errorMessage: errorMessage});
   
 });
 
@@ -685,7 +753,7 @@ app.get('/browse/', async (req, res) => {
                                           loggedIn: loggedIn,
                                           formData: blank, depts: listOfDepts})
   }
-  return res.render("searchbrowser.ejs");
+  return res.render("searchbrowser.ejs", {loggedIn: loggedIn});
 })
 
 /**
