@@ -29,19 +29,13 @@
             </label>
             <select name="rating">
                 <option value="">Choose Rating</option>
-                
-                <% [1,2,3,4,5].forEach((rating) => { %>
-                    <% if (rating === filterRating) {%> 
-                        <option value="<%= rating %>" selected="selected"><%= rating %></option> <%} else {%>
-                        <option value="<%= rating %>">{makeStars(<%= rating %>)}</option> <% } %>
+                <% ['★★★★★', '★★★★☆', '★★★☆☆', '★★☆☆☆', '★☆☆☆☆'].forEach((stars, ind) => { %>
+                    <% if (5-ind === filterRating) {%> 
+                        <option value="<%= 5-ind %>" selected="selected"><%= stars %></option> 
+                    <%} else {%>
+                        <option value="<%= 5-ind  %>"><%= stars %></option> 
+                    <% } %>
                 <% }); %>
-
-
-                <option value=5>★★★★★</option>
-                <option value=4>★★★★☆</option>
-                <option value=3>★★★☆☆</option>
-                <option value=2>★★☆☆☆</option>
-                <option value=1>★☆☆☆☆</option>
             </select>
             <select name="professor">
                 <option value="">Choose Professor</option>
@@ -62,7 +56,9 @@
             <% reviewList.forEach((rev) => {  %>
                 <div class="courseCard" id=<%= rev.id %>>
                     <p class="reviewTitle"><%= rev.title%></p>
-                    <% if (rev.professor != null) { %><p>Professor: <%= rev.professor %></p> <% }%>
+                    <% if (rev.professor != null) { %>
+                        <p>Professor: <%= rev.professor %></p>
+                    <% }%>
                     <p><%= rev.text %></p>
                     <div class="container">
                         <p><%= rev.overallStars %> OVERALL</p>
