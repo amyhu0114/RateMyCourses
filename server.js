@@ -574,7 +574,7 @@ app.post("/review/", async (req, res) => {
   }
 });
 
-/* Uploading syllabi routes */
+/* Uploading syllabi route */
 app.post('/upload/:cid', upload.single('photo'), async (req, res) => {
   // insert file data into mongodb
   const db = await Connection.open(mongoUri, DBNAME);
@@ -587,7 +587,7 @@ app.post('/upload/:cid', upload.single('photo'), async (req, res) => {
   return res.redirect('/');
 });
 
-/* Uploading syllabus for specific courses routes */
+/* Viewing Syllabi route*/
 app.get('/upload/:cid', async (req, res) => {
   const db = await Connection.open(mongoUri, DBNAME);
   let course_id = req.params.cid;
