@@ -21,15 +21,15 @@
             <p><b>Content Difficulty</b> <%= contentStars %> <%= contentNum %> </p>
             <p><b>Workload</b> <%= workloadStars %> <%= workloadNum %> </p>
         </div>
-    <div class = right>
+    <div>
         <form
         id="new course"
         method="GET"
         action="/upload/<%= cid %>" >
-           <button type="submit">View Syllabi</button>
+           <p><button type="submit">View Syllabi</button></p>
         </form>
         <% if(loggedIn){ %>
-            <form action="/upload/<%= cid %>" method="POST" enctype="multipart/form-data">
+            <form action="/upload/<%= cid %>" method="POST" enctype="multipart/form-data" class = "right">
                 <p>Input Syllabus:</p>
                     <p><label for="title">title
                         <input type="text" name="title" placeholder="photo title">
