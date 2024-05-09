@@ -49,26 +49,26 @@
         <p>
             <label>
                 <b>Filter by:</b>
+                <select name="rating">
+                    <option value="">Choose Rating</option>
+                    <% ['★★★★★', '★★★★☆', '★★★☆☆', '★★☆☆☆', '★☆☆☆☆'].forEach((stars, ind) => { %>
+                        <% if (5-ind === filterRating) {%> 
+                            <option value="<%= 5-ind %>" selected="selected"><%= stars %></option> 
+                        <%} else {%>
+                            <option value="<%= 5-ind  %>"><%= stars %></option> 
+                        <% } %>
+                    <% }); %>
+                </select>
+                <select name="professor">
+                    <option value="">Choose Professor</option>
+                    <% professors.forEach((prof) => { %>
+                        <% if (prof === filterProf) {%> 
+                            <option selected="selected"><%= prof %></option> <%} else {%>
+                            <option><%= prof %></option> <% } %>
+                    <% }); %>
+                </select>
+                <input type="submit" value="Filter" id="searchbutton">
             </label>
-            <select name="rating">
-                <option value="">Choose Rating</option>
-                <% ['★★★★★', '★★★★☆', '★★★☆☆', '★★☆☆☆', '★☆☆☆☆'].forEach((stars, ind) => { %>
-                    <% if (5-ind === filterRating) {%> 
-                        <option value="<%= 5-ind %>" selected="selected"><%= stars %></option> 
-                    <%} else {%>
-                        <option value="<%= 5-ind  %>"><%= stars %></option> 
-                    <% } %>
-                <% }); %>
-            </select>
-            <select name="professor">
-                <option value="">Choose Professor</option>
-                <% professors.forEach((prof) => { %>
-                    <% if (prof === filterProf) {%> 
-                        <option selected="selected"><%= prof %></option> <%} else {%>
-                        <option><%= prof %></option> <% } %>
-                <% }); %>
-            </select>
-            <input type="submit" value="Filter" id="searchbutton">
         </p>
     </form>
     <br>
