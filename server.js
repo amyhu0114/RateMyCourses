@@ -187,14 +187,6 @@ async function formatReveiws(reviewData) {
 }
 
 app.get('/course/:cid', async (req, res) => {
-  // finish limited upvoting
-
-  // read Scott's feedback
-  // Update README
-
-  
-
-
   // Set relevant variables
   const cid = req.params.cid;
   const db = await Connection.open(mongoUri, DBNAME);
@@ -239,6 +231,15 @@ app.get('/course/:cid', async (req, res) => {
   // Get session data
   const loggedIn = (req.session.loggedIn) || false;
 
+  let userUpvotes = []
+  let userDownvotes = []
+  if (loggedIn) {
+    const uid = req.session.userId;
+    const user = await db.collection(USERS).find({userId: uid}).toArray();
+    userUpvotes = user[0].upvoted;
+    userDownvotes = user[0].downvoted;
+  }
+
   return res.render("course.ejs", {
         cid: courseData.courseId,
         courseHeader: `${courseData.courseCode}: ${courseData.courseName}`,
@@ -261,6 +262,8 @@ app.get('/course/:cid', async (req, res) => {
         loggedIn: loggedIn,
         filterProf: filterProf,
         filterRating: filterRating,
+        userUpvotes: userUpvotes,
+        userDownvotes: userDownvotes
                                 })
 
 })

@@ -183,3 +183,7 @@ figure figcaption {
 #info p {
   color: rgb(32, 6, 138);
 }
+
+.voted {
+  background-color: red;
+}

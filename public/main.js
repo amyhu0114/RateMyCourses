@@ -78,15 +78,33 @@ $(".courseCard").one().on('click', 'button', (event) => {
     const errorSpan = reviewCard.find('span[data-role=errorMessage]');
     const revId = reviewCard.attr('id');
 
-    // Increment votes
+    // Change vote button colors
     const btnType = event.target.getAttribute('data-role');
+    
+    // Increment votes
+    let curButton = "";
+    let otherButton = "";
     if (btnType === 'downBtn') {
         console.log("DOWN");
+        curButton = reviewCard.find("button[data-role=downBtn]");
+        otherButton = reviewCard.find("button[data-role=upBtn]");
         incVotes(revId, 'down', voteNum, errorSpan);
     } else {
         console.log("UP");
+        curButton = reviewCard.find("button[data-role=upBtn]");
+        otherButton = reviewCard.find("button[data-role=downBtn]");
         incVotes(revId, 'up', voteNum, errorSpan);
     }
+
+    // Color buttons
+    if (curButton.hasClass('voted')){
+        curButton.removeClass('voted');
+    } else {
+        curButton.addClass('voted');
+        if (otherButton.hasClass('voted')){
+            otherButton.removeClass('voted');
+        } 
+    }   
 })
 
 console.log('main.js loaded');

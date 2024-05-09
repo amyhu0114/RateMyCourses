@@ -20,6 +20,7 @@
             <p><b>Accessibility</b> <%= accessibilityStars %> <%= accessibilityNum %> </p>
             <p><b>Content Difficulty</b> <%= contentStars %> <%= contentNum %> </p>
             <p><b>Workload</b> <%= workloadStars %> <%= workloadNum %> </p>
+            <p>HERE<%= userUpvotes %></p>
         </div>
     <div>
         <form
@@ -93,9 +94,19 @@
                         <p><%= rev.accessibilityStars %> Accessibility</p>
                         <p><%= rev.contentStars %> Content Difficulty</p>
                     </div>
-                    <button data-role="upBtn" onclick="">↑</button>
+                    <% if (userUpvotes.includes(rev.id)) {%>
+                        <button data-role="upBtn" class="voted" onclick="">↑</button>
+                    <% } else {%>
+                        <button data-role="upBtn" onclick="">↑</button>
+                    <% } %>
+                    
                     <p data-role="voteNum"><%= rev.upvotes - rev.downvotes%></p>
-                    <button data-role="downBtn">↓</button>
+
+                    <% if (userDownvotes.includes(rev.id)) {%>
+                        <button data-role="downBtn" class="voted" onclick="">↓</button>
+                    <% } else {%>
+                        <button data-role="downBtn" onclick="">↓</button>
+                    <% } %>
                     <span data-role="errorMessage"></span>
                 </div>
             <% }); %>
