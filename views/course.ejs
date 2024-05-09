@@ -79,7 +79,7 @@
             No results for this search! <% } else { %>
             <% reviewList.forEach((rev) => {  %>
                 <div class="courseCard" id=<%= rev.id %>>
-                    <p class="reviewTitle"><%= rev.title%></p>
+                    <h2 class="reviewTitle"><%= rev.title%></h2>
                     <% if (rev.professor != null) { %>
                         <p>Professor: <%= rev.professor %></p>
                     <% }%>
