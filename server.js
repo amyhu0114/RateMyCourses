@@ -1,7 +1,6 @@
 // start app with 'npm run dev' in a terminal window
 // go to http://localhost:port/ to view your deployment!
 // every time you change something in server.js and save, your deployment will automatically reload
-//NEW NYA EDIT
 // to exit, type 'ctrl + c', then press the enter key in a terminal window
 // if you're prompted with 'terminate batch job (y/n)?', type 'y', then press the enter key in the same terminal
 // standard modules, loaded from node_modules
@@ -17,7 +16,6 @@ const flash = require('express-flash');
 const multer = require('multer');
 
 // our modules loaded from cwd
-
 const { Connection } = require('./connection');
 const cs304 = require('./cs304');
 const counter = require('./counter-utils.js');
@@ -25,7 +23,6 @@ const { filter } = require('bluebird');
 
 
 // Create and configure the app
-
 const app = express();
 
 // Morgan reports the final status code of a request's response
@@ -39,7 +36,6 @@ app.use(bodyParser.json());
 
 app.use(cs304.logRequestData);  // tell the user about any request data
 app.use(flash());
-
 
 app.use(serveStatic('public'));
 app.set('view engine', 'ejs');
@@ -55,24 +51,11 @@ app.use(cookieSession({
 }));
 
 
-// Configure MUlter
+// Configure Multer for file upload
+const ALLOWED_EXTENSIONS = ['.pdf' ];
 app.use('/uploads', express.static('uploads'));
 
-
-function timeString(dateObj) {
-  if( !dateObj) {
-      dateObj = new Date();
-  }
-  // convert val to two-digit string
-  d2 = (val) => val < 10 ? '0'+val : ''+val;
-  let hh = d2(dateObj.getHours())
-  let mm = d2(dateObj.getMinutes())
-  let ss = d2(dateObj.getSeconds())
-  return hh+mm+ss
-}
-
-const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png','.pdf' ];
-
+// Helper function for syllabus upload
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
       cb(null, 'uploads')
@@ -80,12 +63,11 @@ var storage = multer.diskStorage({
   filename: function (req, file, cb) {
       // the path module provides a function that returns the extension
       let ext = path.extname(file.originalname).toLowerCase();
-      console.log('extension', ext);
-      let hhmmss = timeString();
-      cb(null, file.fieldname + '-' + hhmmss + ext);
+      cb(null, file.fieldname + '-' + ext);
   }
 })
 
+// Helper function for syllabus upload
 var upload = multer(
   { storage: storage,
     // check whether the file should be allowed
@@ -94,7 +76,6 @@ var upload = multer(
     fileFilter: function(req, file, cb) {
         let ext = path.extname(file.originalname).toLowerCase();
         let ok = ALLOWED_EXTENSIONS.includes(ext);
-        console.log('file ok', ok);
         if(ok) {
             cb(null, true);
         } else {
@@ -103,9 +84,6 @@ var upload = multer(
     },
     // max fileSize in bytes
     limits: {fileSize: 1_000_000 }});
-
-
-const ROUNDS = 15;
 
 // ================================================================
 
@@ -116,17 +94,19 @@ const COURSES = 'courses'
 const REVIEWS = 'reviews'
 const COUNTERS = 'counters'
 const FILES = 'files';
+const ROUNDS = 15;
 
-
-// main page. This shows the use of session cookies
+// Main page. This shows the use of session cookies
 app.get('/', (req, res) => {
-    let uid = req.session.uid || 'unknown';
-    let visits = req.session.visits || 0;
-    visits++;
-    req.session.visits = visits;
-    console.log('uid', uid);
-    loggedIn = (req.session.loggedIn)||false;
-    return res.render('main.ejs', {loggedIn: loggedIn});
+  // Set relevant variables
+  let uid = req.session.uid || 'unknown';
+  let visits = req.session.visits || 0;
+  visits++;
+  req.session.visits = visits;
+
+  // Check logged in status
+  const loggedIn = (req.session.loggedIn) || false;
+  return res.render('main.ejs', {loggedIn: loggedIn});
 });
 
 // =============== Beginning of Sofia Work ============================
@@ -137,13 +117,9 @@ app.get('/', (req, res) => {
  * @returns {string} star representation of given number
  */
 function makeStars(starNum) {
-  if (starNum === undefined) {
-    starNum = 0;
-  }
-  starNum = Math.floor(starNum);
+  starNum = starNum === undefined ? 0 : Math.floor(starNum);
   return '★'.repeat(starNum) + '☆'.repeat(5-starNum);
 }
-
 
 /**
  * Gets the average ratings for the given courseId aggregated by every review for
@@ -167,12 +143,11 @@ async function getAvgRatings(courseId) {
       }
     ]
   ).toArray();
-
   return ratings.length == 0 ? {} : ratings[0];
 }
 
 /**
- * Takes review data from database, formats relevant data.
+ * Takes array of reviews, formats relevant data to display reviews.
  * @param {Array} reviewData 
  * @returns {Array} of reviews
  */
@@ -193,7 +168,7 @@ async function formatReveiws(reviewData) {
       {courseId: parseInt(cid)}).toArray();
     const courseName = courseList[0].courseName;
 
-    // Format course data
+    // Format review data
     return {workloadStars: makeStars(workloadNum),
             accessibilityStars: makeStars(accessibilityNum),
             contentStars: makeStars(contentNum),
@@ -213,8 +188,6 @@ async function formatReveiws(reviewData) {
 
 app.get('/course/:cid', async (req, res) => {
   // START HERE FOR DOC: 
-  // clean up constants
-  // put in collection names as constants
   // clean up console.logs
   // make sure all functions have doc strings
 
@@ -229,10 +202,10 @@ app.get('/course/:cid', async (req, res) => {
   const db = await Connection.open(mongoUri, DBNAME);
   const filterRating = parseInt(req.query.rating);
   const filterProf = req.query.professor;
-  console.log(filterRating, filterProf)
 
   // Get course data
-  const courseList = await db.collection(COURSES).find({courseId: parseInt(cid)}).toArray();
+  const courseList = await db.collection(COURSES).find({
+    courseId: parseInt(cid)}).toArray();
   if (courseList.length === 0) {
     req.flash('error', `Course with courseId ${cid} not found!`);
     return res.redirect("/");
@@ -240,9 +213,11 @@ app.get('/course/:cid', async (req, res) => {
   const courseData = courseList[0]
 
   // Get department data
-  const deptList = await db.collection('departments').find({departmentId: courseData.departmentId}).toArray();
+  const deptList = await db.collection('departments').find({
+    departmentId: courseData.departmentId}).toArray();
   if (deptList.length === 0) {
-    req.flash('error', `Department with departmentId ${courseData.departmentId} not found!`);
+    req.flash('error', 
+      `Department with departmentId ${courseData.departmentId} not found!`);
     return res.redirect("/");
   }
   const departmentName = deptList[0].departmentName;
@@ -255,7 +230,6 @@ app.get('/course/:cid', async (req, res) => {
   if (filterProf !== "" && filterProf !== undefined) {
     query['professor'] = filterProf;
   }
-  console.log("query", query);
 
   // Get review data
   const reviewData = await db.collection(REVIEWS).find(query).toArray();
@@ -263,7 +237,6 @@ app.get('/course/:cid', async (req, res) => {
 
   // Get average ratings data
   const ratings = await getAvgRatings(parseInt(cid));
-  console.log("ratings", ratings);
 
   // Get session data
   const loggedIn = (req.session.loggedIn) || false;
@@ -271,16 +244,21 @@ app.get('/course/:cid', async (req, res) => {
   return res.render("course.ejs", {
         cid: courseData.courseId,
         courseHeader: `${courseData.courseCode}: ${courseData.courseName}`,
-        courseSubheader: `${departmentName} - Taught By: ${courseData.professorNames.join(", ")}`,
+        courseSubheader: 
+          `${departmentName} - Taught By: ${courseData.professorNames.join(", ")}`,
         professors: courseData.professorNames,
         overallStars: makeStars(ratings.overall),
         accessibilityStars: makeStars(ratings.accessibility),
         workloadStars: makeStars(ratings.workload), 
         contentStars: makeStars(ratings.content),
-        overallNum: ratings.overall === undefined ? null : ratings.overall.toFixed(2),
-        accessibilityNum: ratings.accessibility === undefined ? null : ratings.accessibility.toFixed(2),
-        workloadNum: ratings.workload === undefined ? null : ratings.workload.toFixed(2),
-        contentNum: ratings.content === undefined ? null : ratings.content.toFixed(2),
+        overallNum: ratings.overall === undefined ? 
+          null : ratings.overall.toFixed(2),
+        accessibilityNum: ratings.accessibility === undefined ? 
+          null : ratings.accessibility.toFixed(2),
+        workloadNum: ratings.workload === undefined ? 
+          null : ratings.workload.toFixed(2),
+        contentNum: ratings.content === undefined ? 
+          null : ratings.content.toFixed(2),
         reviewList: reviewList,
         loggedIn: loggedIn,
         filterProf: filterProf,
@@ -289,7 +267,7 @@ app.get('/course/:cid', async (req, res) => {
 
 })
 
-// Handles increment/decrementing upvotes & downvotes
+// Ajax function, handles increment/decrementing upvotes & downvotes
 app.post('/increment-votes/', async (req, res) => {  
   // Set relevant variables
   const rid = parseInt(req.body.rid);
@@ -342,24 +320,19 @@ app.post('/increment-votes/', async (req, res) => {
     //   }
     // } 
   
-    // Update voting numbers
+    // Update review voting numbers
     await db.collection(REVIEWS).updateOne({reviewId: rid}, 
       {$inc: {upvotes: upInc, downvotes: downInc}});  
-    
     console.log(upvoted, downvoted)
-    // Update voting lists
+
+    // Update user voting lists
     await db.collection(USERS).updateOne({userId: uid}, 
       {$set: {upvoted: upvoted, downvoted: downvoted}});  
-    
-    const c1 = await db.collection(USERS).find({userId: uid}).toArray();
-    // console.log(c1)
-
-
   } else {
     errorMessage = "Please log in to vote!";
   }
 
-  // Get & return new total votes
+  // Get & return new total votes (second call in case someone else voted when you did)
   const review = await db.collection(REVIEWS).findOne({reviewId: rid});
   return res.json({totalVotes: review.upvotes-review.downvotes, 
                   errorMessage: errorMessage});
@@ -394,9 +367,9 @@ app.post("/join", async (req, res) => {
           userName: username,
           hash: hash
       });
-      console.log('successfully joined', username, password, hash);
+      console.log('successfully joined as', username);
       req.flash('info', 'successfully joined and logged in as ' + username);
-      // set the username and userID of the session and set loggedIn of the session to true
+      // set username & userID of session, set loggedIn of session to true
       req.session.username = username;
       req.session.userId = uID
       req.session.loggedIn = true;
@@ -416,16 +389,14 @@ app.post("/join", async (req, res) => {
       const db = await Connection.open(mongoUri, DBNAME);
       // checks if the username matches any existing account
       var existingUser = await db.collection(USERS).findOne({userName: username});
-      console.log('user', existingUser);
       if (!existingUser) {
         req.flash('error', "Username does not exist - try again.");
         console.log("Username does not exist - try again.");
        return res.redirect('/')
       }
-      // given that the username exists, compare the hashed password stored in database with
+      // Given username exists, compare hashed password stored in database with
       // the hashed version of the password entered by the user
       const match = await bcrypt.compare(password, existingUser.hash); 
-      console.log('match', match);
       if (!match) {
           req.flash('error', "Username or password incorrect - try again.");
           console.log("Username or password incorrect - try again.");
@@ -433,7 +404,7 @@ app.post("/join", async (req, res) => {
       }
       req.flash('info', 'successfully logged in as ' + username);
       console.log('successfully logged in as ' + username);
-      // set the username and userID of the session and set loggedIn of the session to true
+      // set username & userID of session, set loggedIn of the session to true
       req.session.username = username;
       req.session.userId = existingUser.userId
       req.session.loggedIn = true;
@@ -449,7 +420,7 @@ app.post("/join", async (req, res) => {
   // GET handler to enable log out by clearing/nullifying all session info
   app.get('/logout/', async (req,res) => {
     if (req.session.username) {
-      // nullify the username and userID of the session and set loggedIn of the session to false
+      // nullify username & userID of session, set loggedIn of session to false
       req.session.username = null;
       req.session.userId = null
       req.session.loggedIn = false;
@@ -461,7 +432,10 @@ app.post("/join", async (req, res) => {
     }
   });
 
-  // function that ensure the user is logged in to be called by any endpoints that requires login
+  /**
+   * Ensures the user is logged in to be called by any endpoints that 
+   * requires login
+   */
   function requiresLogin(req, res, next) {
     // if the user is not logged in, flash the error and redirect to home
     if (!req.session.loggedIn) {
@@ -478,12 +452,15 @@ app.post("/join", async (req, res) => {
     var userId = req.session.userId;
     var username = req.session.username;
     const db = await Connection.open(mongoUri, DBNAME);
-    const reviewData = await db.collection(REVIEWS).find({userId: parseInt(userId)}).toArray();
+    const reviewData = await db.collection(REVIEWS).find({
+      userId: parseInt(userId)}).toArray();
     const reviewList = await formatReveiws(reviewData);
     
     // Get session data
     const loggedIn = (req.session.loggedIn) || false;
-    return res.render("profile.ejs", {userName: username, reviewList: reviewList, loggedIn: loggedIn});
+    return res.render("profile.ejs", {userName: username, 
+                                      reviewList: reviewList, 
+                                      loggedIn: loggedIn});
   })
 
   // POST handler for user to delete any review they've made
@@ -491,29 +468,53 @@ app.post("/join", async (req, res) => {
         let cID = parseInt(req.body.cID);
         var userId = req.session.userId;
         const db = await Connection.open(mongoUri, DBNAME);
-        let result = await db.collection(REVIEWS).deleteOne({courseId:cID, userId: userId});
-        console.log(result);
+        let result = await db.collection(REVIEWS).deleteOne({courseId:cID, 
+                                                              userId: userId});
     });
 // ===============End of Amy Work ==================================
 
 // ===============Beginning of Nya Work ============================
-/* funtion to insert reviews, 
-  takes in database, courseID, difficulty, workload, review text, userId, rating, and accessibility
-  returns a promise to update the database
-  Helper function for the Post handler of the /review/ page
-*/
-async function insertReview(db, courseId, difficulty, workload, text, userId, rating, accessibility, professor, title){
+/**
+ * Inserts reviews with the given data.
+ * Helper function for the Post handler of the /review/ page.
+ * @param {db} db 
+ * @param {string} courseId 
+ * @param {string} difficulty 
+ * @param {string} workload 
+ * @param {string} text 
+ * @param {string} userId 
+ * @param {string} rating 
+ * @param {string} accessibility 
+ * @param {string} professor 
+ * @param {string} title 
+ * @returns promise to update the database
+ */
+async function insertReview(db, courseId, difficulty, workload, text, userId, 
+  rating, accessibility, professor, title){
+  // Get review id from counter collection
   const counterCol = await db.collection(COUNTERS);
   const newId = await counter.incrCounter(counterCol, REVIEWS);
-  console.log(newId);
-  let result = db.collection(REVIEWS).insertOne({courseId: parseInt(courseId), contentDifficulty: parseInt(difficulty), 
-    workloadRating: parseInt(workload), reviewText: text, userId: parseInt(userId), overallRating: parseInt(rating), 
-    accessibilityRating: parseInt(accessibility), professor: professor, upvotes: 0, downvotes: 0, reviewId: newId, title: title});
+  
+  // Inserts review  
+  let result = db.collection(REVIEWS).insertOne({
+    courseId: parseInt(courseId), 
+    contentDifficulty: parseInt(difficulty), 
+    workloadRating: parseInt(workload), 
+    reviewText: text, 
+    userId: parseInt(userId), 
+    overallRating: parseInt(rating), 
+    accessibilityRating: parseInt(accessibility), 
+    professor: professor, 
+    upvotes: 0, 
+    downvotes: 0, 
+    reviewId: newId, 
+    title: title});
   return result;
 }
 
 /* Get handler for the /review/ page.
-Renders the makeReview.ejs page, with the courses in the database as options for courses to review
+Renders the makeReview.ejs page, with the courses in the database as 
+options for courses to review
 */
 app.get('/review/', requiresLogin, async (req, res) => {
   if (!req.session.loggedIn) {
@@ -522,11 +523,11 @@ app.get('/review/', requiresLogin, async (req, res) => {
     return res.redirect("/");
   }
   const db = await Connection.open(mongoUri, DBNAME);
+
   //finds courses to feed into rendering of makeReview.ejs page
   var courses = await db.collection(COURSES).find({}).toArray();
   var professors = {};
   courses.forEach(course => professors[course.courseId]=course.professorNames)
-  console.log(professors);
   const loggedIn = (req.session.loggedIn) || false;
   res.render('makeReview.ejs', {courses: courses, professors:professors,
                                 loggedIn: loggedIn
@@ -539,6 +540,7 @@ app.get('/review/', requiresLogin, async (req, res) => {
 app.post("/review/", async (req, res) => {
   try {
     const db = await Connection.open(mongoUri, DBNAME);
+
     //getting relevant variables
     var course_id = req.body.courseIdReview;
     var difficulty = req.body.contentDifficulty;
@@ -549,44 +551,43 @@ app.post("/review/", async (req, res) => {
     var userId = req.session.userId;
     var professor = req.body.Professor;
     var title = req.body.reviewTitle;
-    console.log('professor: ',professor);
+
+    // Handles adding a new professor
     if (professor == 'other' || professor == null){
       var newProf = req.body.newProf;
-      await insertReview(db, course_id, difficulty, workload, text, userId, rating, accessibility, newProf, title);
-      await db.collection(COURSES).updateOne({courseId: parseInt(course_id)}, {$push: {professorNames: newProf}});
-      //do something to add to course
+      await insertReview(db, course_id, difficulty, workload, text, userId, 
+        rating, accessibility, newProf, title);
+      await db.collection(COURSES).updateOne({courseId: parseInt(course_id)}, 
+                                              {$push: {professorNames: newProf}});
     }
-    else{
-    //inserting the review
-    await insertReview(db, course_id, difficulty, workload, text, userId, rating, accessibility, professor, title);
+    else{ //inserting the review
+    await insertReview(db, course_id, difficulty, workload, text, userId, 
+      rating, accessibility, professor, title);
     }
-    //flashing verification that the review is submitted, and redirecting to the home page
+
+    //flashing verification that review is submitted, redirects to the home page
     req.flash("info", "You have successfully submitted a review!");
     return res.redirect('/course/'+course_id);
-  } catch (error) {
-    //error handler, redirects to home page
+  } catch (error) { //error handler, redirects to home page
     req.flash('error', `Form submission error: ${error}`);
     return res.redirect('/')
   }
 });
 
-/*uploading syllabi*/
-
+/* Uploading syllabi routes */
 app.post('/upload/:cid', upload.single('photo'), async (req, res) => {
-  console.log("AAAAAA");
-  console.log('uploaded data', req.body);
-  console.log('file', req.file);
   // insert file data into mongodb
   const db = await Connection.open(mongoUri, DBNAME);
   const unprot = db.collection(FILES);
   const result = await unprot.insertOne({title: req.body.title,
                                          courseId: req.params.cid,
                                          path: '/uploads/'+req.file.filename});
-  console.log('insertOne result', result);
+  // Flash confirmation
   req.flash('info', 'file uploaded');
   return res.redirect('/');
 });
 
+/* Uploading syllabus for specific courses routes */
 app.get('/upload/:cid', async (req, res) => {
   const db = await Connection.open(mongoUri, DBNAME);
   let course_id = req.params.cid;
@@ -595,33 +596,49 @@ app.get('/upload/:cid', async (req, res) => {
   return res.render('uploadSyllabus.ejs', {uploads: files, loggedIn: loggedIn});
 });
 
-/* funtion to insert courses, helper function for the /inputCourse/ POST handler
-  takes in database, courseID, course name, course code, department id, and a list of professors
-  returns a promise to update the database
-*/
-async function insertCourse(db, course_name, course_code, department_id, professor_list){
+/**
+ * Inserts a course with the given info.
+ * Helper function for the /inputCourse/ POST handler.
+ * @param {db} db 
+ * @param {string} course_name 
+ * @param {string} course_code 
+ * @param {string} department_id 
+ * @param {Array} professor_list 
+ * @returns a promise to update the database
+ */
+async function insertCourse(db, course_name, course_code, department_id, 
+  professor_list){
+  // Get course id from counters collection
   const counterCol = await db.collection(COUNTERS);
   const course_id = await counter.incrCounter(counterCol, COURSES);
-  let result = db.collection(COURSES).insertOne({courseId: parseInt(course_id), courseName: course_name, 
-    courseCode: course_code, departmentId: parseInt(department_id), professorNames: professor_list});
+
+  // Insert course
+  let result = db.collection(COURSES).insertOne({
+    courseId: parseInt(course_id), 
+    courseName: course_name, 
+    courseCode: course_code, 
+    departmentId: parseInt(department_id), 
+    professorNames: professor_list});
   return result;
 }
 
 /* get handler for /inputCourse/ page
-The input course button on the /review/ page, redirects to this page
-renders the makeCourse.ejs form, with the available departments as options on the form
+The input course button on the /review/ page, redirects to this page renders the 
+makeCourse.ejs form, with the available departments as options on the form
 */
 app.get('/inputCourse/', requiresLogin, async (req, res) => {
+  //flashes error, does not let you access this page if you're not logged in
   if (!req.session.loggedIn) {
-    //flashes error and does not let you access this page if you are not logged in
     req.flash('error', 'You are not logged in - please do so.');
     console.log('You are not logged in - please do so.');
     return res.redirect("/");
   }
-  const db = await Connection.open(mongoUri, DBNAME);
+
   //finds departments to put in the ejs form when rendering
+  const db = await Connection.open(mongoUri, DBNAME);
   var departments = await db.collection("departments").find({}).toArray();
   
+  // Gets session info
   const loggedIn = (req.session.loggedIn) || false;
   res.render('makeCourse.ejs', {departments: departments, loggedIn: loggedIn});
 });
@@ -632,17 +649,20 @@ app.get('/inputCourse/', requiresLogin, async (req, res) => {
 */
 app.post("/inputCourse/", async (req, res) => {
   try {
-    const db = await Connection.open(mongoUri, DBNAME);
     //getting the relevant variables
+    const db = await Connection.open(mongoUri, DBNAME);
     var course_name = req.body.courseName;
     var course_code = req.body.courseCode;
     var department_id = req.body.department;
+
     //inserting the course
     insertCourse(db, course_name, course_code, department_id, []);
+
     //flashing and redirecting after insertion
     req.flash("info", "You have successfully submitted a Course!");
     return res.redirect('/review/');
   } catch (error) {
+
     //Error handler, redirects to home page, and flashes the error
     req.flash('error', `Form submission error: ${error}`);
     return res.redirect('/')
@@ -662,41 +682,31 @@ app.post("/inputCourse/", async (req, res) => {
 app.get('/search/', async (req, res) => {
   let formData = req.query.term;
   console.log(`you submitted ${formData} to the search`)
-  
 
   //create Regular expression to search
   let customRegex = new RegExp(formData, 'i');
-  //console.log(customRegex);
 
   //open database connection
   const db = await Connection.open(mongoUri, DBNAME);
-  const classDB = db.collection("classes");
-  console.log("successfully connected to database")
   let listOfDepts = await db.collection("departments").find().toArray();
-  console.log("Depts list: ", listOfDepts);
   
   //search database for term
-  let searchResults = await db.collection(COURSES).find({courseCode: {$regex: customRegex}}).project({_id: 0, courseCode: 1, courseId: 1}).toArray();
-  console.log(searchResults);
-  console.log("successfully queried database");
+  let searchResults = await db.collection(COURSES).find(
+    {courseCode: {$regex: customRegex}}).project(
+      {_id: 0, courseCode: 1, courseId: 1}).toArray();
 
   //handle no search results
   if(searchResults.length <1){
     console.log("no results identified");
     req.flash('error', 'Sorry, your search did not return any results.');
-    console.log("flashed");
     return res.redirect("/");
-  }
-
-  //handle one to multiple results
-  else if(searchResults.length >= 1){
+  } else if(searchResults.length >= 1){  //handle one to multiple results
     console.log("Search results identified");
     let searchStrings = [];
     searchResults.forEach(((elt) => searchStrings.push(searchLinkGenerator(elt))));
-    console.log(searchStrings);
     
+    // Get session info
     loggedIn = (req.session.loggedIn) || false;
-
     return res.render("searchResult.ejs", {searchResults: searchStrings, 
                                           loggedIn: loggedIn,
                                           formData: formData, depts: listOfDepts})
@@ -704,40 +714,35 @@ app.get('/search/', async (req, res) => {
 })
 /**
  * Function for generating search results with clickable hyperlinks
- * @param {*} searchResult tuple containing coursecode and coursename info from database
+ * @param {tuple} searchResult (coursecode, coursename) info from database
  * @returns hyperlink and class name to be displayed on site
  */
 function searchLinkGenerator(searchResult) {
   let className = searchResult.courseCode;
   let courseID = searchResult.courseId
-  console.log(`/course/${courseID}`, `${className}`);
   return [`/course/${courseID}`, `${className}`]
 }
 
 /**
- * Route to go to the "browse all courses" page, which is the search page with all available 
- * results loaded. Also dynamically generates the filter by department dropdown options
- * from the available departments listed in the database. 
- * 
+ * Route to go to the "browse all courses" page, which is the search 
+ * page with all available results loaded. Also dynamically generates the 
+ * filter by department dropdown options from the available departments 
+ * listed in the database. 
  */
 app.get('/browse/', async (req, res) => {
+  // Get query
   let queryDept = req.query.department;
-  console.log(req.body);
   console.log(`you submitted ${queryDept} to the search`)
   
-  //open database connection
+  //open database connection & set variables
   const db = await Connection.open(mongoUri, DBNAME);
-  const classDB = db.collection("classes");
   console.log("successfully connected to database")
   let blank = "";
-
   let deptIdInt = parseInt(queryDept)
-  //now, search courses for department ID
-
   const loggedIn = (req.session.loggedIn) || false;
-
+  
+  //now, search courses for department ID
   let searchResults = await db.collection(COURSES).find({departmentId: deptIdInt}).toArray();
-
   let listOfDepts = await db.collection("departments").find().toArray();
   //now we have our list of search results
   
@@ -745,7 +750,6 @@ app.get('/browse/', async (req, res) => {
   if(searchResults.length <1){
     console.log("no results identified");
     req.flash('error', 'Sorry, there are no courses currently listed in this department.');
-    //console.log("flashed");
     return res.redirect("/search/");
   }
 
@@ -754,12 +758,12 @@ app.get('/browse/', async (req, res) => {
     console.log("Search results identified");
     let searchStrings = [];
     searchResults.forEach(((elt) => searchStrings.push(searchLinkGenerator(elt))));
-    console.log(searchStrings);
-
+    
     return res.render("searchResult.ejs", {searchResults: searchStrings, 
                                           loggedIn: loggedIn,
                                           formData: blank, depts: listOfDepts})
   }
+
   return res.render("searchbrowser.ejs", {loggedIn: loggedIn});
 })
 
@@ -767,25 +771,21 @@ app.get('/browse/', async (req, res) => {
  * route to send the user to the signup prompt page
  */
 app.get('/signup/', async (req, res) => {
-
-  return res.render("signup.ejs")
-
+  const loggedIn = (req.session.loggedIn) || false;
+  return res.render("signup.ejs" , {loggedIn: loggedIn})
 })
 
 /**
  * route to send the user to the login
  */
 app.get('/login/', async (req, res) => {
-
-  return res.render("login.ejs")
-
+  const loggedIn = (req.session.loggedIn) || false;
+  return res.render("login.ejs", {loggedIn: loggedIn})
 })
 
 //================End of Nico Work =================================
 
-
 const serverPort = cs304.getPort(8080);
-
 // this is last, because it never returns
 app.listen(serverPort, function() {
     console.log(`open http://localhost:${serverPort}`);
